@@ -1,7 +1,8 @@
 export class Player {
     constructor(x, y) {
-        this.x = x;
-        this.y = y;
+        this.game = game;
+        //this.x = x;
+        //this.y = y;
 
         this.width = 40;
         this.height = 40;
@@ -35,12 +36,24 @@ export class Player {
         this.velocityY += this.gravity;
         this.y += this.velocityY;
 
-        // Chão simples
-        if (this.y + this.height >= 350) {
-            this.y = 350 - this.height;
-            this.velocityY = 0;
-            this.grounded = true;
+        this.grounded = false;
+
+        for (let platform of this.game.platforms) {
+
+            if (
+                this.x < platform.x + platform.width &&
+                this.x + this.width > platform.x &&
+                this.y + this.height <= platform.y + this.velocityY &&
+                this.y + this.height + this.velocityY >= platform.y
+            ) {
+                this.y = platform.y - this.height;
+                this.velocityY = 0;
+                this.grounded = true;
+            }
         }
+
+
+        
     }
 
     draw(ctx) {

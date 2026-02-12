@@ -1,8 +1,9 @@
 export class Player {
-    constructor(x, y) {
+    constructor(x, y, game) {
         this.game = game;
-        //this.x = x;
-        //this.y = y;
+
+        this.x = x;
+        this.y = y;
 
         this.width = 40;
         this.height = 40;
@@ -26,25 +27,22 @@ export class Player {
             this.x -= this.speed;
         }
 
-        // Pulo
-        if (input.keys["ArrowUp"] && this.grounded) {
-            this.velocityY = this.jumpForce;
-            this.grounded = false;
-        }
-
-        // Gravidade
+        // Aplicar gravidade
         this.velocityY += this.gravity;
         this.y += this.velocityY;
 
+        // Reset grounded
         this.grounded = false;
 
+        // Colisão com plataformas
         for (let platform of this.game.platforms) {
 
             if (
                 this.x < platform.x + platform.width &&
                 this.x + this.width > platform.x &&
-                this.y + this.height <= platform.y + this.velocityY &&
-                this.y + this.height + this.velocityY >= platform.y
+                this.y + this.height > platform.y &&
+                this.y + this.height < platform.y + platform.height &&
+                this.velocityY >= 0
             ) {
                 this.y = platform.y - this.height;
                 this.velocityY = 0;
@@ -52,8 +50,11 @@ export class Player {
             }
         }
 
-
-        
+        // Pulo
+        if (input.keys["ArrowUp"] && this.grounded) {
+            this.velocityY = this.jumpForce;
+            this.grounded = false;
+        }
     }
 
     draw(ctx) {

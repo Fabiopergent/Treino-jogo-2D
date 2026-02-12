@@ -12,20 +12,17 @@ export class Game {
         this.canvas.height = 400;
 
         this.input = new Input();
-        this.player = new Player(100, 300, this);
-
-        this.lastTime = 0;
 
         this.platforms = [
-           new Platform(0, 350, 800, 50),
-           new Platform(200, 280, 120, 20),
-           new Platform(400, 220, 120, 20),
-           new Platform(600, 300, 120, 20)
+            new Platform(0, 350, 800, 50),
+            new Platform(200, 280, 120, 20),
+            new Platform(400, 220, 120, 20),
+            new Platform(600, 300, 120, 20)
         ];
 
-        this.platforms.forEach(platform => platform.draw(this.ctx));
+        this.player = new Player(100, 100, this);
 
-
+        this.lastTime = 0;
     }
 
     start() {
@@ -48,6 +45,9 @@ export class Game {
 
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        this.platforms.forEach(platform => platform.draw(this.ctx));
+
         this.player.draw(this.ctx);
     }
 

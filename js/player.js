@@ -29,39 +29,40 @@ export class Player {
 
         // Aplicar gravidade
         this.velocityY += this.gravity;
+
+        // Movimento vertical
         this.y += this.velocityY;
+        
 
         // Reset grounded
         this.grounded = false;
 
-        // Reset grounded
-this.grounded = false;
+        // Colisão com plataformas
+        for (let platform of this.game.platforms) {
 
-// Colisão com plataformas
-for (let platform of this.game.platforms) {
+            let playerBottom = this.y + this.height;
+            let playerTop = this.y;
+            let playerRight = this.x + this.width;
+            let playerLeft = this.x;
 
-    let playerBottom = this.y + this.height;
-    let playerTop = this.y;
-    let playerRight = this.x + this.width;
-    let playerLeft = this.x;
+            let platformTop = platform.y;
+            let platformBottom = platform.y + platform.height;
+            let platformLeft = platform.x;
+            let platformRight = platform.x + platform.width;
 
-    let platformTop = platform.y;
-    let platformLeft = platform.x;
-    let platformRight = platform.x + platform.width;
-
-    // Verifica colisão vindo de cima
-    if (
-        playerRight > platformLeft &&
-        playerLeft < platformRight &&
-        playerBottom >= platformTop &&
-        playerBottom <= platformTop + this.velocityY &&
-        this.velocityY >= 0
-    ) {
-        this.y = platformTop - this.height;
-        this.velocityY = 0;
-        this.grounded = true;
-    }
-}
+            // Colisão vindo de cima
+            if (
+                playerRight > platformLeft &&
+                playerLeft < platformRight &&
+                playerBottom > platformTop &&
+                playerTop < platformTop &&
+                this.velocityY >= 0
+            ) {
+                this.y = platformTop - this.height;
+                this.velocityY = 0;
+                this.grounded = true;
+            }
+        }
 
         // Pulo
         if (input.keys["ArrowUp"] && this.grounded) {
@@ -69,6 +70,7 @@ for (let platform of this.game.platforms) {
             this.grounded = false;
         }
     }
+
 
     draw(ctx) {
         ctx.fillStyle = "red";

@@ -34,21 +34,34 @@ export class Player {
         // Reset grounded
         this.grounded = false;
 
-        // Colisão com plataformas
-        for (let platform of this.game.platforms) {
+        // Reset grounded
+this.grounded = false;
 
-            if (
-                this.x < platform.x + platform.width &&
-                this.x + this.width > platform.x &&
-                this.y + this.height > platform.y &&
-                this.y + this.height < platform.y + platform.height &&
-                this.velocityY >= 0
-            ) {
-                this.y = platform.y - this.height;
-                this.velocityY = 0;
-                this.grounded = true;
-            }
-        }
+// Colisão com plataformas
+for (let platform of this.game.platforms) {
+
+    let playerBottom = this.y + this.height;
+    let playerTop = this.y;
+    let playerRight = this.x + this.width;
+    let playerLeft = this.x;
+
+    let platformTop = platform.y;
+    let platformLeft = platform.x;
+    let platformRight = platform.x + platform.width;
+
+    // Verifica colisão vindo de cima
+    if (
+        playerRight > platformLeft &&
+        playerLeft < platformRight &&
+        playerBottom >= platformTop &&
+        playerBottom <= platformTop + this.velocityY &&
+        this.velocityY >= 0
+    ) {
+        this.y = platformTop - this.height;
+        this.velocityY = 0;
+        this.grounded = true;
+    }
+}
 
         // Pulo
         if (input.keys["ArrowUp"] && this.grounded) {

@@ -35,34 +35,60 @@ export class Player {
         
 
         // Reset grounded
-        this.grounded = false;
+this.grounded = false;
 
-        // Colisão com plataformas
-        for (let platform of this.game.platforms) {
+// ===== COLISÕES =====
+for (let platform of this.game.platforms) {
 
-            let playerBottom = this.y + this.height;
-            let playerTop = this.y;
-            let playerRight = this.x + this.width;
-            let playerLeft = this.x;
+    let playerBottom = this.y + this.height;
+    let playerTop = this.y;
+    let playerRight = this.x + this.width;
+    let playerLeft = this.x;
 
-            let platformTop = platform.y;
-            let platformBottom = platform.y + platform.height;
-            let platformLeft = platform.x;
-            let platformRight = platform.x + platform.width;
+    let platformTop = platform.y;
+    let platformBottom = platform.y + platform.height;
+    let platformLeft = platform.x;
+    let platformRight = platform.x + platform.width;
 
-            // Colisão vindo de cima
-            if (
-                playerRight > platformLeft &&
-                playerLeft < platformRight &&
-                playerBottom > platformTop &&
-                playerTop < platformTop &&
-                this.velocityY >= 0
-            ) {
-                this.y = platformTop - this.height;
-                this.velocityY = 0;
-                this.grounded = true;
-            }
-        }
+    // =========================
+    // COLISÃO POR CIMA (piso)
+    // =========================
+    if (
+        playerRight > platformLeft &&
+        playerLeft < platformRight &&
+        playerBottom >= platformTop &&
+        playerTop < platformTop &&
+        this.velocityY >= 0
+    ) {
+        this.y = platformTop - this.height;
+        this.velocityY = 0;
+        this.grounded = true;
+    }
+
+    // =========================
+    // COLISÃO PELA ESQUERDA
+    // =========================
+    if (
+        playerRight > platformLeft &&
+        playerLeft < platformLeft &&
+        playerBottom > platformTop &&
+        playerTop < platformBottom
+    ) {
+        this.x = platformLeft - this.width;
+    }
+
+    // =========================
+    // COLISÃO PELA DIREITA
+    // =========================
+    if (
+        playerLeft < platformRight &&
+        playerRight > platformRight &&
+        playerBottom > platformTop &&
+        playerTop < platformBottom
+    ) {
+        this.x = platformRight;
+    }
+}
 
         // Pulo
         if (input.keys["ArrowUp"] && this.grounded) {

@@ -16,6 +16,8 @@ export class Player {
         this.grounded = false;
     }
 
+    
+
     update(input) {
 
         // Movimento lateral
@@ -102,4 +104,6 @@ for (let platform of this.game.platforms) {
         ctx.fillStyle = "red";
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
+
+    
 }

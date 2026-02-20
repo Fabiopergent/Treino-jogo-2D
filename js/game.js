@@ -43,8 +43,25 @@ export class Game {
     update(deltaTime) {
     this.player.update(this.input);
 
+    // =========================
+// LIMITES DO MUNDO
+// =========================
+
+// esquerda
+if (this.x < 0) {
+    this.x = 0;
+}
+
+// direita
+if (this.x + this.width > this.game.worldWidth) {
+    this.x = this.game.worldWidth - this.width;
+}
+
     // câmera segue o jogador
-    this.cameraX = this.player.x - this.canvas.width / 2;
+    const targetCameraX = this.player.x - this.canvas.width / 2;
+
+    // suavização (lerp)
+    this.cameraX += (targetCameraX - this.cameraX) * 0.1;
 
     // trava na esquerda
     if (this.cameraX < 0) {

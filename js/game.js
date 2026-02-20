@@ -7,10 +7,13 @@ export class Game {
     constructor() {
         this.canvas = document.getElementById("gameCanvas");
         this.ctx = this.canvas.getContext("2d");
-        this.cameraX = 0;
+
         this.canvas.width = 800;
         this.canvas.height = 400;
-        this.worldWidth = 2000; // largura do mundo
+
+        this.worldWidth = 2000;
+        this.cameraX = 0;
+        this.cameraSmooth = 0.1; // suavização da câmera
 
         this.input = new Input();
 
@@ -41,57 +44,39 @@ export class Game {
     }
 
     update(deltaTime) {
-    this.player.update(this.input);
+        this.player.update(this.input);
 
-    // =========================
-// LIMITES DO MUNDO
-// =========================
+        // 🎥 câmera alvo (centro do player)
+        const targetCamera = this.player.x - this.canvas.width / 2;
 
-// esquerda
-if (this.x < 0) {
-    this.x = 0;
-}
+        // suavização (remove trepidação)
+        this.cameraX += (targetCamera - this.cameraX) * this.cameraSmooth;
 
-// direita
-if (this.x + this.width > this.game.worldWidth) {
-    this.x = this.game.worldWidth - this.width;
-}
+        // trava esquerda
+        if (this.cameraX < 0) this.cameraX = 0;
 
-    // câmera segue o jogador
-    const targetCameraX = this.player.x - this.canvas.width / 2;
-
-    // suavização (lerp)
-   // this.cameraX += (targetCameraX - this.cameraX) * 0.1;
-
-    // trava na esquerda
-    if (this.cameraX < 0) {
-        this.cameraX = 0;
+        // trava direita
+        const maxCamera = this.worldWidth - this.canvas.width;
+        if (this.cameraX > maxCamera) this.cameraX = maxCamera;
     }
-
-    // 🔥 trava na direita (IMPORTANTE)
-    const maxCamera = this.worldWidth - this.canvas.width;
-    if (this.cameraX > maxCamera) {
-        this.cameraX = maxCamera;
-    }
-}
-    
 
     draw() {
-       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        // fundo azul
+        this.ctx.fillStyle = "#87CEEB";
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-       this.ctx.save();
+        this.ctx.save();
 
-    // aplica câmera
-       this.ctx.translate(-this.cameraX, 0);
+        // aplica câmera
+        this.ctx.translate(-Math.floor(this.cameraX), 0);
 
-    // desenha plataformas
-       this.platforms.forEach(platform => platform.draw(this.ctx));
+        // plataformas
+        this.platforms.forEach(platform => platform.draw(this.ctx));
 
-    // desenha player
-       this.player.draw(this.ctx);
+        // player
+        this.player.draw(this.ctx);
 
-       this.ctx.restore();
-}
-
-    
+        this.ctx.restore();
+  
+    }
 }

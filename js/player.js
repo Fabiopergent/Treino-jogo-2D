@@ -8,94 +8,86 @@ export class Player {
         this.width = 40;
         this.height = 40;
 
-        this.speed = 5;
-        this.velocityY = 0;
+        this.velX = 0;
+        this.velY = 0;
+
+        this.speed = 4;
         this.gravity = 0.5;
         this.jumpForce = -10;
 
-        this.grounded = false;
+        this.onGround = false;
+    
     }
 
-    
 
     update(input) {
+        // ===== MOVIMENTO HORIZONTAL =====
+        this.velX = 0;
 
-        // Movimento lateral
+
         if (input.keys["ArrowRight"]) {
-            this.x += this.speed;
+            this.velX = this.speed;
         }
 
         if (input.keys["ArrowLeft"]) {
-            this.x -= this.speed;
+            this.velX = -this.speed;
         }
 
-        // Aplicar gravidade
-        this.velocityY += this.gravity;
+        // ===== PULO =====
+        if (input.keys["Space"] && this.onGround) {
+            this.velY = this.jumpForce;
+            this.onGround = false;
+        }
 
-        // Movimento vertical
-        this.y += this.velocityY;
-        
+        // ===== GRAVIDADE =====
+        this.velY += this.gravity;
 
-        // Reset grounded
-this.grounded = false;
+        // ===== APLICA MOVIMENTO =====
+        this.x += this.velX;
+        this.y += this.velY;
 
-// ===== COLISÕES =====
-for (let platform of this.game.platforms) {
+        // ===== COLISÃO COM PLATAFORMAS =====
+        this.onGround = false;
 
-    let playerBottom = this.y + this.height;
-    let playerTop = this.y;
-    let playerRight = this.x + this.width;
-    let playerLeft = this.x;
+        this.game.platforms.forEach(platform => {
+            const dentroX =
+                this.x + this.width > platform.x &&
+                this.x < platform.x + platform.width;
 
-    let platformTop = platform.y;
-    let platformBottom = platform.y + platform.height;
-    let platformLeft = platform.x;
-    let platformRight = platform.x + platform.width;
+            const tocandoTopo =
+                this.y + this.height >= platform.y &&
+                this.y + this.height <= platform.y + platform.height &&
+                this.velY >= 0;
 
-    // =========================
-    // COLISÃO POR CIMA (piso)
-    // =========================
-    if (
-        playerRight > platformLeft &&
-        playerLeft < platformRight &&
-        playerBottom >= platformTop &&
-        playerTop < platformTop &&
-        this.velocityY >= 0
-    ) {
-        this.y = platformTop - this.height;
-        this.velocityY = 0;
-        this.grounded = true;
-    }
+            if (dentroX && tocandoTopo) {
+                this.y = platform.y - this.height;
+                this.velY = 0;
+                this.onGround = true;
+            }
+        });
 
-    // =========================
-    // COLISÃO PELA ESQUERDA
-    // =========================
-    if (
-        playerRight > platformLeft &&
-        playerLeft < platformLeft &&
-        playerBottom > platformTop &&
-        playerTop < platformBottom
-    ) {
-        this.x = platformLeft - this.width;
-    }
+        // ===== LIMITES DO MUNDO =====
 
-    // =========================
-    // COLISÃO PELA DIREITA
-    // =========================
-    if (
-        playerLeft < platformRight &&
-        playerRight > platformRight &&
-        playerBottom > platformTop &&
-        playerTop < platformBottom
-    ) {
-        this.x = platformRight;
-    }
-}
+        // esquerda
+        if (this.x < 0) this.x = 0;
 
-        // Pulo
-        if (input.keys["ArrowUp"] && this.grounded) {
-            this.velocityY = this.jumpForce;
-            this.grounded = false;
+        // direita
+        const maxX = this.game.worldWidth - this.width;
+        if (this.x > maxX) this.x = maxX;
+
+        // chão de segurança (fallback)
+        if (this.y > this.game.canvas.height) {
+            this.y = 0;
+            this.velY = 0;
+        }
+
+        // proteção contra NaN
+        if (isNaN(this.x) || isNaN(this.y)) {
+            console.warn("Player NaN detectado — resetando");
+            this.x = 100;
+            this.y = 100;
+            this.velX = 0;
+            this.velY = 0;
         }
     }
 
@@ -105,5 +97,5 @@ for (let platform of this.game.platforms) {
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 
-    
+
 }

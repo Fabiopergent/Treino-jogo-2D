@@ -7,7 +7,7 @@ export class Game {
     constructor() {
         this.canvas = document.getElementById("gameCanvas");
         this.ctx = this.canvas.getContext("2d");
-
+        this.cameraX = 0;
         this.canvas.width = 800;
         this.canvas.height = 400;
 
@@ -40,7 +40,16 @@ export class Game {
     }
 
     update(deltaTime) {
-        this.player.update(this.input);
+    this.player.update(this.input);
+
+    // câmera segue o jogador
+    this.cameraX = this.player.x - this.canvas.width / 2;
+
+    // evita câmera negativa
+    if (this.cameraX < 0) {
+        this.cameraX = 0;
+    }
+}
     }
 
     draw() {

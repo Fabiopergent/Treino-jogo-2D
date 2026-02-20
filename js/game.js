@@ -40,25 +40,34 @@ export class Game {
     }
 
     update(deltaTime) {
-    this.player.update(this.input);
+       this.player.update(this.input);
 
     // câmera segue o jogador
-    this.cameraX = this.player.x - this.canvas.width / 2;
+       this.cameraX = this.player.x - this.canvas.width / 2;
 
     // evita câmera negativa
-    if (this.cameraX < 0) {
-        this.cameraX = 0;
+       if (this.cameraX < 0) {
+         this.cameraX = 0;
+        }
     }
-}
-    }
+    
 
     draw() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        this.platforms.forEach(platform => platform.draw(this.ctx));
+       this.ctx.save();
 
-        this.player.draw(this.ctx);
-    }
+    // aplica câmera
+       this.ctx.translate(-this.cameraX, 0);
+
+    // desenha plataformas
+       this.platforms.forEach(platform => platform.draw(this.ctx));
+
+    // desenha player
+       this.player.draw(this.ctx);
+
+       this.ctx.restore();
+}
 
     
 }

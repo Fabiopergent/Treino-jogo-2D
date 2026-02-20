@@ -102,7 +102,7 @@ export class Player {
     // 🔥 PULO VARIÁVEL (corte do pulo)
     if (!input.keys["ArrowUp"] && this.velocityY < 0) {
        this.velocityY *= this.jumpCutMultiplier;
-}
+    }
 
     // ===== LIMITES DO MUNDO =====
     if (this.x < 0) this.x = 0;
@@ -110,10 +110,38 @@ export class Player {
     if (this.x + this.width > this.game.worldWidth) {
         this.x = this.game.worldWidth - this.width;
     }
+
+    // ===============================
+// 👾 COLISÃO COM INIMIGOS
+// ===============================
+for (let enemy of this.game.enemies) {
+    if (!enemy.alive) continue;
+
+    const hit =
+        this.x < enemy.x + enemy.width &&
+        this.x + this.width > enemy.x &&
+        this.y < enemy.y + enemy.height &&
+        this.y + this.height > enemy.y;
+
+    if (hit) {
+        // 🔥 matou o inimigo pulando em cima
+        if (this.velocityY > 0 && this.y + this.height - enemy.y < 20) {
+            enemy.alive = false;
+            this.velocityY = this.jumpForce * 0.6; // quique
+        } else {
+            // 💀 player morreu (reset simples)
+            this.x = 100;
+            this.y = 100;
+            this.velocityY = 0;
+        }
+    }
+}
+
 }
 
     draw(ctx) {
         ctx.fillStyle = "red";
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
+
 }

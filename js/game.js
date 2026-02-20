@@ -1,6 +1,7 @@
 import { Player } from './player.js';
 import { Input } from './input.js';
 import { Platform } from './platform.js';
+import { Enemy } from './enemy.js';
 
 
 export class Game {
@@ -27,6 +28,13 @@ export class Game {
         this.player = new Player(100, 100, this);
 
         this.lastTime = 0;
+        
+        this.enemies = [
+            new Enemy(500, 310),
+            new Enemy(900, 310)
+];
+
+
     }
 
     start() {
@@ -45,6 +53,7 @@ export class Game {
 
     update(deltaTime) {
         this.player.update(this.input);
+        this.enemies.forEach(enemy => enemy.update());
 
         // 🎥 câmera alvo (centro do player)
         const targetCamera = this.player.x - this.canvas.width / 2;
@@ -72,6 +81,9 @@ export class Game {
 
         // plataformas
         this.platforms.forEach(platform => platform.draw(this.ctx));
+         
+        // inimigos
+        this.enemies.forEach(enemy => enemy.draw(this.ctx));
 
         // player
         this.player.draw(this.ctx);

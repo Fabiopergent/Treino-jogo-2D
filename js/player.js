@@ -12,6 +12,7 @@ export class Player {
         this.velocityY = 0;
         this.gravity = 0.5;
         this.jumpForce = -10;
+        this.jumpCutMultiplier = 0.5;
 
         this.onGround = false;
     }
@@ -97,6 +98,11 @@ export class Player {
             }
         }
     }
+
+    // 🔥 PULO VARIÁVEL (corte do pulo)
+    if (!input.keys["ArrowUp"] && this.velocityY < 0) {
+       this.velocityY *= this.jumpCutMultiplier;
+}
 
     // ===== LIMITES DO MUNDO =====
     if (this.x < 0) this.x = 0;

@@ -61,7 +61,7 @@ if (this.x + this.width > this.game.worldWidth) {
     const targetCameraX = this.player.x - this.canvas.width / 2;
 
     // suavização (lerp)
-    this.cameraX += (targetCameraX - this.cameraX) * 0.1;
+   // this.cameraX += (targetCameraX - this.cameraX) * 0.1;
 
     // trava na esquerda
     if (this.cameraX < 0) {

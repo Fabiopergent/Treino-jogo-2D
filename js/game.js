@@ -10,11 +10,12 @@ export class Game {
         this.cameraX = 0;
         this.canvas.width = 800;
         this.canvas.height = 400;
+        this.worldWidth = 2000; // largura do mundo
 
         this.input = new Input();
 
         this.platforms = [
-            new Platform(0, 350, 800, 50),
+            new Platform(0, 350, 2000, 50),
             new Platform(200, 280, 120, 20),
             new Platform(400, 220, 120, 20),
             new Platform(600, 300, 120, 20)
@@ -40,16 +41,22 @@ export class Game {
     }
 
     update(deltaTime) {
-       this.player.update(this.input);
+    this.player.update(this.input);
 
     // câmera segue o jogador
-       this.cameraX = this.player.x - this.canvas.width / 2;
+    this.cameraX = this.player.x - this.canvas.width / 2;
 
-    // evita câmera negativa
-       if (this.cameraX < 0) {
-         this.cameraX = 0;
-        }
+    // trava na esquerda
+    if (this.cameraX < 0) {
+        this.cameraX = 0;
     }
+
+    // 🔥 trava na direita (IMPORTANTE)
+    const maxCamera = this.worldWidth - this.canvas.width;
+    if (this.cameraX > maxCamera) {
+        this.cameraX = maxCamera;
+    }
+}
     
 
     draw() {

@@ -17,58 +17,94 @@ export class Player {
     }
 
     update(input) {
-        // Movimento lateral
-        if (input.keys["ArrowRight"]) {
-            this.x += this.speed;
-        }
+    // ===== MOVIMENTO HORIZONTAL =====
+    let moveX = 0;
 
-        if (input.keys["ArrowLeft"]) {
-            this.x -= this.speed;
-        }
+    if (input.keys["ArrowRight"]) moveX = this.speed;
+    if (input.keys["ArrowLeft"]) moveX = -this.speed;
 
-        // Gravidade
-        this.velocityY += this.gravity;
-        this.y += this.velocityY;
-
-        // Reset chão
+    // ===== PULO =====
+    if (input.keys["ArrowUp"] && this.onGround) {
+        this.velocityY = this.jumpForce;
         this.onGround = false;
+    }
 
-        // Colisão com plataformas
-        for (let platform of this.game.platforms) {
-            const playerBottom = this.y + this.height;
-            const playerRight = this.x + this.width;
-            const playerLeft = this.x;
+    // ===== GRAVIDADE =====
+    this.velocityY += this.gravity;
 
-            const platformTop = platform.y;
-            const platformLeft = platform.x;
-            const platformRight = platform.x + platform.width;
+    // ===============================
+    // 🔥 COLISÃO HORIZONTAL PRIMEIRO
+    // ===============================
+    this.x += moveX;
 
+    for (let platform of this.game.platforms) {
+        const overlapY =
+            this.y + this.height > platform.y &&
+            this.y < platform.y + platform.height;
+
+        if (overlapY) {
+            // batendo pela direita
             if (
-                playerRight > platformLeft &&
-                playerLeft < platformRight &&
-                playerBottom >= platformTop &&
-                playerBottom <= platformTop + this.velocityY &&
-                this.velocityY >= 0
+                moveX > 0 &&
+                this.x + this.width > platform.x &&
+                this.x < platform.x
             ) {
-                this.y = platformTop - this.height;
+                this.x = platform.x - this.width;
+            }
+
+            // batendo pela esquerda
+            if (
+                moveX < 0 &&
+                this.x < platform.x + platform.width &&
+                this.x + this.width > platform.x + platform.width
+            ) {
+                this.x = platform.x + platform.width;
+            }
+        }
+    }
+
+    // ===============================
+    // 🔥 COLISÃO VERTICAL
+    // ===============================
+    this.y += this.velocityY;
+    this.onGround = false;
+
+    for (let platform of this.game.platforms) {
+        const overlapX =
+            this.x + this.width > platform.x &&
+            this.x < platform.x + platform.width;
+
+        if (overlapX) {
+            // caindo no topo
+            if (
+                this.velocityY >= 0 &&
+                this.y + this.height >= platform.y &&
+                this.y + this.height <= platform.y + this.velocityY + 5
+            ) {
+                this.y = platform.y - this.height;
                 this.velocityY = 0;
                 this.onGround = true;
             }
-        }
 
-        // Pulo
-        if (input.keys["ArrowUp"] && this.onGround) {
-            this.velocityY = this.jumpForce;
-            this.onGround = false;
-        }
-
-        // 🔥 limites do mundo
-        if (this.x < 0) this.x = 0;
-
-        if (this.x + this.width > this.game.worldWidth) {
-            this.x = this.game.worldWidth - this.width;
+            // batendo por baixo
+            if (
+                this.velocityY < 0 &&
+                this.y <= platform.y + platform.height &&
+                this.y >= platform.y
+            ) {
+                this.y = platform.y + platform.height;
+                this.velocityY = 0;
+            }
         }
     }
+
+    // ===== LIMITES DO MUNDO =====
+    if (this.x < 0) this.x = 0;
+
+    if (this.x + this.width > this.game.worldWidth) {
+        this.x = this.game.worldWidth - this.width;
+    }
+}
 
     draw(ctx) {
         ctx.fillStyle = "red";

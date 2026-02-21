@@ -10,21 +10,17 @@
 <script>
 const btn = document.getElementById("fullscreenBtn");
 
-btn.addEventListener("click", () => {
-    const elem = document.documentElement; // 🔥 mais compatível
+btn.addEventListener("click", async () => {
+    try {
+        const elem = document.documentElement;
 
-    if (!document.fullscreenElement) {
-        if (elem.requestFullscreen) {
-            elem.requestFullscreen();
-        } else if (elem.webkitRequestFullscreen) { // iOS / Safari
-            elem.webkitRequestFullscreen();
-        } else if (elem.msRequestFullscreen) {
-            elem.msRequestFullscreen();
+        if (!document.fullscreenElement) {
+            await elem.requestFullscreen();
+        } else {
+            await document.exitFullscreen();
         }
-    } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        }
+    } catch (err) {
+        console.log("Fullscreen erro:", err);
     }
 });
 </script>

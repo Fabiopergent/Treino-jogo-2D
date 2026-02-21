@@ -5,9 +5,29 @@
     <title>Projeto Game em Java</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
+
+<script>
+document.getElementById("fullscreenBtn").addEventListener("click", () => {
+    const canvas = document.getElementById("gameCanvas");
+
+    if (canvas.requestFullscreen) {
+        canvas.requestFullscreen();
+    }
+});
+</script>
+
 <body>
 
+<button id="fullscreenBtn">Tela cheia</button>    
+
 <canvas id="gameCanvas"></canvas>
+
+<div id="mobileControls">
+    <button id="btnLeft">◀</button>
+    <button id="btnRight">▶</button>
+    <button id="btnJump">⤴</button>
+    <button id="btnShoot">🔥</button>
+</div>
 
 <script type="module" src="js/main.js"></script>
 

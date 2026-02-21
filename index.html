@@ -2,16 +2,29 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Projeto Game em Java</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <script>
-document.getElementById("fullscreenBtn").addEventListener("click", () => {
-    const canvas = document.getElementById("gameCanvas");
+const btn = document.getElementById("fullscreenBtn");
 
-    if (canvas.requestFullscreen) {
-        canvas.requestFullscreen();
+btn.addEventListener("click", () => {
+    const elem = document.documentElement; // 🔥 mais compatível
+
+    if (!document.fullscreenElement) {
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) { // iOS / Safari
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) {
+            elem.msRequestFullscreen();
+        }
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
     }
 });
 </script>

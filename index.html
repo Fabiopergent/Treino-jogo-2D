@@ -8,20 +8,22 @@
 </head>
 
 <script>
-const btn = document.getElementById("fullscreenBtn");
+document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("fullscreenBtn");
 
-btn.addEventListener("click", async () => {
-    try {
-        const elem = document.documentElement;
+    btn.addEventListener("click", async () => {
+        try {
+            const elem = document.documentElement;
 
-        if (!document.fullscreenElement) {
-            await elem.requestFullscreen();
-        } else {
-            await document.exitFullscreen();
+            if (!document.fullscreenElement) {
+                await elem.requestFullscreen();
+            } else {
+                await document.exitFullscreen();
+            }
+        } catch (err) {
+            console.log("Erro fullscreen:", err);
         }
-    } catch (err) {
-        console.log("Fullscreen erro:", err);
-    }
+    });
 });
 </script>
 

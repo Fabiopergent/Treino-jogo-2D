@@ -1,3 +1,5 @@
+import { Bullet } from "./bullet.js";
+
 export class Player {
     constructor(x, y, game) {
         this.game = game;
@@ -15,14 +17,25 @@ export class Player {
         this.jumpCutMultiplier = 0.5;
 
         this.onGround = false;
+
+        this.bullets = [];
+        this.shootCooldown = 0;
+        this.direction = 1; // começa olhando direita
     }
 
     update(input) {
     // ===== MOVIMENTO HORIZONTAL =====
-    let moveX = 0;
 
-    if (input.keys["ArrowRight"]) moveX = this.speed;
-    if (input.keys["ArrowLeft"]) moveX = -this.speed;
+
+    if (input.keys["ArrowRight"]) {
+         this.x += this.speed;
+         this.direction = 1;
+         }
+
+     if (input.keys["ArrowLeft"]) {
+         this.x -= this.speed;
+         this.direction = -1;
+        }
 
     // ===== PULO =====
     if (input.keys["ArrowUp"] && this.onGround) {
@@ -81,7 +94,7 @@ export class Player {
                 this.velocityY >= 0 &&
                 this.y + this.height >= platform.y &&
                 this.y + this.height <= platform.y + this.velocityY + 5
-            ) {
+             ) {
                 this.y = platform.y - this.height;
                 this.velocityY = 0;
                 this.onGround = true;
@@ -102,46 +115,75 @@ export class Player {
     // 🔥 PULO VARIÁVEL (corte do pulo)
     if (!input.keys["ArrowUp"] && this.velocityY < 0) {
        this.velocityY *= this.jumpCutMultiplier;
-    }
+     }
 
-    // ===== LIMITES DO MUNDO =====
-    if (this.x < 0) this.x = 0;
+       // ===== LIMITES DO MUNDO =====
+      if (this.x < 0) this.x = 0;
 
-    if (this.x + this.width > this.game.worldWidth) {
+      if (this.x + this.width > this.game.worldWidth) {
         this.x = this.game.worldWidth - this.width;
     }
 
     // ===============================
-// 👾 COLISÃO COM INIMIGOS
-// ===============================
-for (let enemy of this.game.enemies) {
-    if (!enemy.alive) continue;
+    // 👾 COLISÃO COM INIMIGOS
+    // ===============================
+    for (let enemy of this.game.enemies) {
+       if (!enemy.alive) continue;
 
-    const hit =
+        const hit =
         this.x < enemy.x + enemy.width &&
         this.x + this.width > enemy.x &&
         this.y < enemy.y + enemy.height &&
         this.y + this.height > enemy.y;
 
-    if (hit) {
+        if (hit) {
         // 🔥 matou o inimigo pulando em cima
         if (this.velocityY > 0 && this.y + this.height - enemy.y < 20) {
             enemy.alive = false;
             this.velocityY = this.jumpForce * 0.6; // quique
-        } else {
+           } else {
             // 💀 player morreu (reset simples)
             this.x = 100;
             this.y = 100;
             this.velocityY = 0;
+               }
+             }
         }
-    }
-}
 
-}
+        // cooldown tiro
+        if (this.shootCooldown > 0) {
+           this.shootCooldown--;
+        }
+
+       // atirar
+       if (input.keys["Space"] && this.shootCooldown <= 0) {
+          this.shoot();
+          this.shootCooldown = 20;
+          }
+
+        // atualizar balas
+       this.bullets.forEach(b => b.update());
+       this.bullets = this.bullets.filter(b => !b.markedForDeletion);
+
+    }
 
     draw(ctx) {
         ctx.fillStyle = "red";
         ctx.fillRect(this.x, this.y, this.width, this.height);
+        this.bullets.forEach(b => b.draw(ctx));
     }
+
+    shoot() {
+    const bulletX = this.direction === 1
+        ? this.x + this.width
+        : this.x - 10;
+
+         const bulletY = this.y + this.height / 2;
+
+           this.bullets.push(
+             new Bullet(bulletX, bulletY, this.direction)
+            );
+        }
+       
 
 }

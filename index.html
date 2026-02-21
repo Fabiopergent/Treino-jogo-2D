@@ -7,25 +7,7 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const btn = document.getElementById("fullscreenBtn");
 
-    btn.addEventListener("click", async () => {
-        try {
-            const elem = document.documentElement;
-
-            if (!document.fullscreenElement) {
-                await elem.requestFullscreen();
-            } else {
-                await document.exitFullscreen();
-            }
-        } catch (err) {
-            console.log("Erro fullscreen:", err);
-        }
-    });
-});
-</script>
 
 <body>
 
@@ -41,6 +23,27 @@ document.addEventListener("DOMContentLoaded", () => {
 </div>
 
 <script type="module" src="js/main.js"></script>
+
+<!-- ✅ SCRIPT FULLSCREEN NO FINAL -->
+<script>
+const btn = document.getElementById("fullscreenBtn");
+
+if (btn) {
+    btn.addEventListener("click", async () => {
+        try {
+            const elem = document.documentElement;
+
+            if (!document.fullscreenElement) {
+                await elem.requestFullscreen();
+            } else {
+                await document.exitFullscreen();
+            }
+        } catch (err) {
+            console.log("Erro fullscreen:", err);
+        }
+    });
+}
+</script>
 
 </body>
 </html>

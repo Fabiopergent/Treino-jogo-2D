@@ -2,16 +2,18 @@ export class Input {
     constructor() {
         this.keys = {};
 
-        // ===== CONTROLES TOUCH =====
-        this.setupTouchControls();
-
-        // ===== TECLADO =====
+        // teclado
         window.addEventListener("keydown", (e) => {
             this.keys[e.key] = true;
         });
 
         window.addEventListener("keyup", (e) => {
             this.keys[e.key] = false;
+        });
+
+        // espera DOM completo (IMPORTANTE mobile)
+        window.addEventListener("load", () => {
+            this.setupTouchControls();
         });
     }
 
@@ -20,7 +22,7 @@ export class Input {
             { id: "btnLeft", key: "ArrowLeft" },
             { id: "btnRight", key: "ArrowRight" },
             { id: "btnJump", key: "ArrowUp" },
-            { id: "btnShoot", key: "Space" }
+            { id: "btnShoot", key: " " } // 🔥 espaço correto
         ];
 
         map.forEach(btn => {
@@ -38,7 +40,7 @@ export class Input {
                 this.keys[btn.key] = false;
             });
 
-            // MOUSE (desktop)
+            // mouse
             el.addEventListener("mousedown", () => {
                 this.keys[btn.key] = true;
             });

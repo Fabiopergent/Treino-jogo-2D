@@ -23,19 +23,25 @@ export class Player {
         this.direction = 1; // começa olhando direita
     }
 
+
+//=======UPDATE+++++++
+
+
     update(input) {
     // ===== MOVIMENTO HORIZONTAL =====
 
+       let moveX = 0; // 🔥 FALTAVA ISSO
 
     if (input.keys["ArrowRight"]) {
-         this.x += this.speed;
-         this.direction = 1;
-         }
+        moveX = this.speed;
+        this.direction = 1;
+    }
 
-     if (input.keys["ArrowLeft"]) {
-         this.x -= this.speed;
-         this.direction = -1;
-        }
+    if (input.keys["ArrowLeft"]) {
+        moveX = -this.speed;
+        this.direction = -1;
+    }
+    
 
     // ===== PULO =====
     if (input.keys["ArrowUp"] && this.onGround) {
@@ -49,7 +55,7 @@ export class Player {
     // ===============================
     // 🔥 COLISÃO HORIZONTAL PRIMEIRO
     // ===============================
-    this.x += moveX;
+    
 
     for (let platform of this.game.platforms) {
         const overlapY =

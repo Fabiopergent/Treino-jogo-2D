@@ -1,4 +1,5 @@
 import { Bullet } from "./bullet.js";
+import { gameState } from "./gameState.js";
 
 export class Player {
     constructor(x, y, game) {
@@ -144,17 +145,20 @@ export class Player {
         this.y + this.height > enemy.y;
 
         if (hit) {
-        // 🔥 matou o inimigo pulando em cima
-        if (this.velocityY > 0 && this.y + this.height - enemy.y < 20) {
-            enemy.alive = false;
-            this.velocityY = this.jumpForce * 0.6; // quique
-           } else {
-            // 💀 player morreu (reset simples)
-            this.x = 100;
-            this.y = 100;
-            this.velocityY = 0;
-               }
-             }
+            // 🔥 matou o inimigo pulando em cima
+            if (this.velocityY > 0 && this.y + this.height - enemy.y < 20) {
+                enemy.alive = false;
+                this.velocityY = this.jumpForce * 0.6; // quique
+            } else {
+                // 💀 SUBSTITUA o seu código de "reset" atual por este bloco:
+                gameState.takeDamage(); // Reduz vida no gameState
+                
+                // Feedback visual ou reset temporário de posição
+                this.x = 100;
+                this.y = 100;
+                this.velocityY = 0;
+            }
+        }
         }
 
         // cooldown tiro

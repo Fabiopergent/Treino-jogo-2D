@@ -2,6 +2,7 @@ import { Player } from './player.js';
 import { Input } from './input.js';
 import { Platform } from './platform.js';
 import { Enemy } from './enemy.js';
+import { gameState } from './gameState.js';
 
 
 export class Game {
@@ -120,6 +121,12 @@ export class Game {
         this.player.draw(this.ctx);
 
         this.ctx.restore();
+
+        // 🔥 ADICIONE ESTE BLOCO PARA MOSTRAR A VIDA
+        this.ctx.fillStyle = "white";
+        this.ctx.font = "20px Arial";
+        this.ctx.fillText("Vidas: " + gameState.lives, 20, 30);
+    }
   
     }
 

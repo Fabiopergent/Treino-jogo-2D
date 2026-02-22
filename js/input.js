@@ -12,9 +12,9 @@ export class Input {
         });
 
         // espera DOM completo (IMPORTANTE mobile)
-        window.addEventListener("load", () => {
+       // window.addEventListener("load", () => {
             this.setupTouchControls();
-        });
+       // });
     }
 
     setupTouchControls() {

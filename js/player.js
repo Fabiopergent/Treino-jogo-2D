@@ -42,6 +42,7 @@ export class Player {
         this.direction = -1;
     }
     
+    this.x += moveX;
 
     // ===== PULO =====
     if (input.keys["ArrowUp"] && this.onGround) {

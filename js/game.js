@@ -56,6 +56,10 @@ export class Game {
         requestAnimationFrame(this.loop.bind(this));
     }
 
+
+//+++++++ Update=========
+
+
     update(deltaTime) {
         this.player.update(this.input);
         this.enemies.forEach(enemy => enemy.update());
@@ -76,6 +80,22 @@ export class Game {
         this.generatePlatforms();
 
         this.cleanupPlatforms();
+
+
+        // Colisão bala vs inimigo
+        this.player.bullets.forEach(bullet => {
+           this.enemies.forEach(enemy => {
+            if (enemy.alive && 
+               bullet.x < enemy.x + enemy.width &&
+               bullet.x + bullet.width > enemy.x &&
+               bullet.y < enemy.y + enemy.height &&
+               bullet.y + bullet.height > enemy.y) {
+            
+               enemy.alive = false; // Inimigo morre
+                  bullet.markedForDeletion = true; // Bala some
+                }
+            });
+        });
 
 
     }

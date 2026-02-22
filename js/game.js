@@ -128,14 +128,13 @@ export class Game {
         this.ctx.fillText("Vidas: " + gameState.lives, 20, 30);
     }
   
-    }
-
+    
 
     cleanupPlatforms() {
     this.platforms = this.platforms.filter(
         platform => platform.x + platform.width > this.cameraX - 200
-    );
-}
+      );
+      }
       
      generatePlatforms() {
     // gera enquanto a câmera se aproxima do fim

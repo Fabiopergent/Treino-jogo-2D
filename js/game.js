@@ -40,7 +40,9 @@ export class Game {
         this.enemies = [
             new Enemy(500, 310),
             new Enemy(900, 310)
-];
+        ];
+
+        this.items = [];
 
 
     }
@@ -113,6 +115,19 @@ export class Game {
                 }
             });
         });
+
+        this.items.forEach(item => {
+                // Colisão player vs item
+                if (this.player.x < item.x + item.width &&
+                    this.player.x + this.player.width > item.x &&
+                    this.player.y < item.y + item.height &&
+                    this.player.y + this.player.height > item.y) {
+                    
+                    if (item.type === 'heal') gameState.gainLife();
+                    item.markedForDeletion = true;
+                    }
+                });
+        this.items = this.items.filter(i => !i.markedForDeletion);
 
 
     }

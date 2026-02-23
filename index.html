@@ -11,9 +11,30 @@
 
 <body>
 
-<button id="fullscreenBtn">Tela cheia</button>    
+<div id="menu">
+    <h1>Monster Survival</h1>
+    <button id="startButton">JOGAR</button>
+</div>
+
+<button id="fullscreenBtn">Tela cheia</button>
+
 
 <canvas id="gameCanvas"></canvas>
+
+<style>
+    #menu {
+        position: absolute;
+        top: 0; left: 0;
+        width: 800px; height: 400px;
+        background: rgba(0,0,0,0.8);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 10;
+    }
+</style>
 
 <div id="mobileControls">
     <button id="btnLeft">◀</button>

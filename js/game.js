@@ -44,6 +44,14 @@ export class Game {
 
         this.items = [];
 
+        this.menu = document.getElementById("menu");
+        this.startButton = document.getElementById("startButton");
+
+        this.startButton.addEventListener("click", () => {
+        this.menu.style.display = "none"; // Esconde o menu
+        this.start(); // Inicia o loop
+        });
+
 
     }
 

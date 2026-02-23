@@ -23,7 +23,7 @@ export class Enemy {
         if (this.hp <= 0) {
            this.alive = false;
            // 20% de chance de dropar um item
-              if (Math.random() < 0.2) {
+              if (Math.random() < 0.1) {
                 this.game.items.push(new Item(this.x, this.y, 'heal'));
             }
         }    

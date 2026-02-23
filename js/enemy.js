@@ -33,7 +33,7 @@ export class Enemy {
         if (!this.alive) return;
 
         //gravidade
-        //this.y += 0.5;
+        this.y += 0.5;
 
         // Lógica de perseguição
         this.direction = (player.x > this.x) ? 1 : -1;

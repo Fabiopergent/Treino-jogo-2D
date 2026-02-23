@@ -99,8 +99,8 @@ export class Game {
         this.enemyTimer++;
         if (this.enemyTimer > 300) { // A cada X frames (ajuste conforme a dificuldade)
             const spawnX = this.cameraX + this.canvas.width + 100 + Math.random() * 200; // Espalha em 200px
-            const spawnY = 310;
-            //const spawnY = 280 + Math.random() * 40; // Varia um pouco a altura para não ficarem na mesma linha
+            //const spawnY = 310;
+            const spawnY = 310 + Math.random() * 10; // Varia um pouco a altura para não ficarem na mesma linha
             let newEnemy = new Enemy(spawnX, spawnY, this);
             // Ajuste de dificuldade progressiva
             newEnemy.speed = 1 + (gameState.currentLevel * 0.2); 

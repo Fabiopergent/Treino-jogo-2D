@@ -67,7 +67,13 @@ export class Game {
 
     update(deltaTime) {
         this.player.update(this.input);
-        this.enemies.forEach(enemy => enemy.update(this.player));
+        this.enemies.forEach(enemy => {
+            
+            // Apenas atualiza a IA se o inimigo estiver perto da tela (1200px de margem)
+            if (Math.abs(enemy.x - this.cameraX) < 1200) {
+                enemy.update(this.player);
+            }
+            });
 
         // 🎥 câmera alvo (centro do player)
         const targetCamera = this.player.x - this.canvas.width / 2;
@@ -88,16 +94,17 @@ export class Game {
         // 2. Limpar plataformas antigas (aumente um pouco a margem)
         this.cleanupPlatforms();
 
-        // No js/game.js, dentro de update(deltaTime):
 
-            this.enemyTimer++;
-            if (this.enemyTimer > 300) { // A cada X frames (ajuste conforme a dificuldade)
-                const spawnX = this.cameraX + this.canvas.width + 100;
-                let newEnemy = new Enemy(spawnX, 310, this);
-                // Ajuste de dificuldade progressiva
-                newEnemy.speed = 1 + (gameState.currentLevel * 0.2); 
-                this.enemies.push(newEnemy);
-                this.enemyTimer = 0;
+
+        this.enemyTimer++;
+        if (this.enemyTimer > 300) { // A cada X frames (ajuste conforme a dificuldade)
+            const spawnX = this.cameraX + this.canvas.width + 100 + Math.random() * 200; // Espalha em 200px
+            const spawnY = 280 + Math.random() * 40; // Varia um pouco a altura para não ficarem na mesma linha
+            let newEnemy = new Enemy(spawnX, spawnY, this);
+            // Ajuste de dificuldade progressiva
+            newEnemy.speed = 1 + (gameState.currentLevel * 0.2); 
+            this.enemies.push(newEnemy);
+            this.enemyTimer = 0;
             }
 
 
@@ -127,6 +134,7 @@ export class Game {
                     item.markedForDeletion = true;
                     }
                 });
+        this.enemies = this.enemies.filter(enemy => enemy.alive);
         this.items = this.items.filter(i => !i.markedForDeletion);
 
 
@@ -150,7 +158,7 @@ export class Game {
 
         // desenhar itens
         this.items.forEach(item => item.draw(this.ctx));
-        
+
         // player
         this.player.draw(this.ctx);
 

@@ -19,6 +19,8 @@ export class Game {
 
         this.input = new Input();
 
+        this.enemyTimer = 0;
+
         this.nextPlatformX = 800; // onde começa gerar
         this.platformSpacing = 180; // distância média
         this.minPlatformWidth = 100;
@@ -78,9 +80,20 @@ export class Game {
         const maxCamera = this.worldWidth - this.canvas.width;
         if (this.cameraX > maxCamera) this.cameraX = maxCamera;
 
+        // 1. Gerar novas plataformas primeiro
         this.generatePlatforms();
 
+        // 2. Limpar plataformas antigas (aumente um pouco a margem)
         this.cleanupPlatforms();
+
+        // No js/game.js, dentro de update(deltaTime):
+
+            this.enemyTimer++;
+            if (this.enemyTimer > 300) { // A cada X frames (ajuste conforme a dificuldade)
+                const spawnX = this.cameraX + this.canvas.width + 100;
+                this.enemies.push(new Enemy(spawnX, 310));
+                this.enemyTimer = 0; // Reseta o contador
+            }
 
 
         // Colisão bala vs inimigo
@@ -128,17 +141,19 @@ export class Game {
         this.ctx.fillText("Vidas: " + gameState.lives, 20, 30);
     }
   
-    
+
 
     cleanupPlatforms() {
-    this.platforms = this.platforms.filter(
-        platform => platform.x + platform.width > this.cameraX - 200
-      );
-      }
+    // Filtra mantendo a primeira plataforma (o chão) ou as que estão perto da câmera
+    this.platforms = this.platforms.filter((platform, index) => {
+        if (index === 0) return true; // Nunca deleta o chão (índice 0)
+        return platform.x + platform.width > this.cameraX - 500; // Margem maior (500)
+          });
+        }
       
-     generatePlatforms() {
-    // gera enquanto a câmera se aproxima do fim
-    while (this.nextPlatformX < this.cameraX + this.canvas.width + 400) {
+      generatePlatforms() {
+      // gera enquanto a câmera se aproxima do fim
+      while (this.nextPlatformX < this.cameraX + this.canvas.width + 400) {
         
         const width =
             this.minPlatformWidth +

@@ -32,6 +32,9 @@ export class Enemy {
     update(player) { // Agora recebe o player para perseguir
         if (!this.alive) return;
 
+        //gravidade
+        this.y += 0.5;
+
         // Lógica de perseguição
         this.direction = (player.x > this.x) ? 1 : -1;
         this.x += this.speed * this.direction;

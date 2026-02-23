@@ -1,7 +1,8 @@
 import { Item } from './item.js';
 
 export class Enemy {
-    constructor(x, y) {
+    constructor(x, y, game) {
+        this.game = game;
         this.x = x;
         this.y = y;
 

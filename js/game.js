@@ -38,8 +38,8 @@ export class Game {
         this.lastTime = 0;
         
         this.enemies = [
-            new Enemy(500, 310),
-            new Enemy(900, 310)
+            new Enemy(500, 310, this),
+            new Enemy(900, 310, this)
         ];
 
         this.items = [];
@@ -93,7 +93,7 @@ export class Game {
             this.enemyTimer++;
             if (this.enemyTimer > 300) { // A cada X frames (ajuste conforme a dificuldade)
                 const spawnX = this.cameraX + this.canvas.width + 100;
-                let newEnemy = new Enemy(spawnX, 310);
+                let newEnemy = new Enemy(spawnX, 310, this);
                 // Ajuste de dificuldade progressiva
                 newEnemy.speed = 1 + (gameState.currentLevel * 0.2); 
                 this.enemies.push(newEnemy);
@@ -148,6 +148,9 @@ export class Game {
         // inimigos
         this.enemies.forEach(enemy => enemy.draw(this.ctx));
 
+        // desenhar itens
+        this.items.forEach(item => item.draw(this.ctx));
+        
         // player
         this.player.draw(this.ctx);
 

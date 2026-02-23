@@ -65,7 +65,7 @@ export class Game {
 
     update(deltaTime) {
         this.player.update(this.input);
-        this.enemies.forEach(enemy => enemy.update());
+        this.enemies.forEach(enemy => enemy.update(this.player));
 
         // 🎥 câmera alvo (centro do player)
         const targetCamera = this.player.x - this.canvas.width / 2;
@@ -91,8 +91,11 @@ export class Game {
             this.enemyTimer++;
             if (this.enemyTimer > 300) { // A cada X frames (ajuste conforme a dificuldade)
                 const spawnX = this.cameraX + this.canvas.width + 100;
-                this.enemies.push(new Enemy(spawnX, 310));
-                this.enemyTimer = 0; // Reseta o contador
+                let newEnemy = new Enemy(spawnX, 310);
+                // Ajuste de dificuldade progressiva
+                newEnemy.speed = 1 + (gameState.currentLevel * 0.2); 
+                this.enemies.push(newEnemy);
+                this.enemyTimer = 0;
             }
 
 
@@ -105,7 +108,7 @@ export class Game {
                bullet.y < enemy.y + enemy.height &&
                bullet.y + bullet.height > enemy.y) {
             
-               enemy.alive = false; // Inimigo morre
+               enemy.takeDamage(); // <--- Chama o novo método de dano
                   bullet.markedForDeletion = true; // Bala some
                 }
             });

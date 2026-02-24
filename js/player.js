@@ -45,7 +45,7 @@ export class Player {
 
         // ===== PULO =====
         if (input.keys["ArrowUp"] && this.onGround) {
-            this.velocityY = this.jumpForce * speedFactor;
+            this.velocityY = this.jumpForce;
             this.onGround = false;
         }
 

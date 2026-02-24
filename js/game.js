@@ -74,6 +74,11 @@ export class Game {
 
 
     update(deltaTime) {
+        // 1. Checagem de Game Over
+            if (gameState.lives <= 0) {
+                this.gameOver(); // Vamos criar esta função abaixo
+                return; // Para o update aqui
+            }
         this.player.update(this.input, deltaTime);
         this.enemies.forEach(enemy => {
 
@@ -147,6 +152,16 @@ export class Game {
         this.items = this.items.filter(i => !i.markedForDeletion);
 
 
+    }
+
+    gameOver() {
+        this.menu.style.display = "flex"; // Mostra o menu de novo
+        this.menu.querySelector("h1").innerText = "GAME OVER";
+        // Opcional: resetar vidas e nível
+        gameState.lives = 3;
+        gameState.currentLevel = 1;
+        this.enemies = [];
+        this.items = [];
     }
 
     draw() {

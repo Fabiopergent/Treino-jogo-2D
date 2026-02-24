@@ -15,7 +15,7 @@ export class Player {
         this.speed = 5;
         this.velocityY = 0;
         this.gravity = 0.5;
-        this.jumpForce = -8;
+        this.jumpForce = -5;
         this.jumpCutMultiplier = 0.5;
 
         this.onGround = false;

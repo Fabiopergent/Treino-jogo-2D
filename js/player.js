@@ -45,13 +45,13 @@ export class Player {
 
         // ===== PULO =====
         if (input.keys["ArrowUp"] && this.onGround) {
-            this.velocityY = this.jumpForce;
+            this.velocityY = this.jumpForce * speedFactor;
             this.onGround = false;
         }
 
         // ===== GRAVIDADE =====
-        this.velocityY += this.gravity;
-        this.y += this.velocityY;
+        this.velocityY += this.gravity * speedFactor;
+        this.y += this.velocityY * speedFactor;
 
         // ===== COLISÃO HORIZONTAL =====
         for (let platform of this.game.platforms) {

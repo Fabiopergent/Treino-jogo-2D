@@ -139,6 +139,8 @@ export class Player {
         this.y = 100;
         this.velocityY = 0;
         this.onGround = false;
+        this.bullets = []; 
+        this.shootCooldown = 0;
     }
 
     draw(ctx) {
@@ -148,6 +150,7 @@ export class Player {
     }
 
     shoot() {
+        console.log("Balas ativas:", this.bullets.length); // Verifique se esse número reseta para 0 após morrer
         const bulletX = this.direction === 1 ? this.x + this.width : this.x - 10;
         const bulletY = this.y + this.height / 2;
         this.bullets.push(new Bullet(bulletX, bulletY, this.direction));

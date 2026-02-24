@@ -79,7 +79,7 @@ export class Game {
 
             // Apenas atualiza a IA se o inimigo estiver perto da tela (1200px de margem)
             if (Math.abs(enemy.x - this.cameraX) < 1200) {
-                enemy.update(this.player);
+                enemy.update(this.player, deltaTime);
             }
             });
 

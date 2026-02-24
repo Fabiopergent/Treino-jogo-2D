@@ -15,7 +15,7 @@ export class Player {
         this.speed = 5;
         this.velocityY = 0;
         this.gravity = 0.5;
-        this.jumpForce = -10;
+        this.jumpForce = -8;
         this.jumpCutMultiplier = 0.5;
 
         this.onGround = false;
@@ -51,8 +51,7 @@ export class Player {
 
         // ===== GRAVIDADE =====
         this.velocityY += this.gravity * speedFactor;
-        this.y += this.velocityY * speedFactor;
-
+        
         // ===== COLISÃO HORIZONTAL =====
         for (let platform of this.game.platforms) {
             const overlapY =
@@ -70,7 +69,7 @@ export class Player {
         }
 
         // ===== COLISÃO VERTICAL =====
-        this.y += this.velocityY;
+        this.y += this.velocityY *speedFactor;
         this.onGround = false;
 
         for (let platform of this.game.platforms) {

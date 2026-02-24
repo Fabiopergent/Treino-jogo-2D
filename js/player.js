@@ -50,8 +50,8 @@ export class Player {
         }
 
         // ===== GRAVIDADE =====
-        this.velocityY += this.gravity * speedFactor;
-        this.y += this.velocityY * speedFactor;
+        this.velocityY += this.gravity;
+        this.y += this.velocityY;
 
         // ===== COLISÃO HORIZONTAL =====
         for (let platform of this.game.platforms) {

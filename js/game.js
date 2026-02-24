@@ -74,7 +74,7 @@ export class Game {
 
 
     update(deltaTime) {
-        this.player.update(this.input);
+        this.player.update(this.input, deltaTime);
         this.enemies.forEach(enemy => {
 
             // Apenas atualiza a IA se o inimigo estiver perto da tela (1200px de margem)

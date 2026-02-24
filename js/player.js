@@ -26,19 +26,20 @@ export class Player {
     }
 
 
-    update(input) {
+    update(input, deltaTime) {
+        const speedFactor = deltaTime / 16.6; // 16.6ms é a base de 60fps
         // ===== MOVIMENTO HORIZONTAL =====
+
         let moveX = 0;
-
-        if (input.keys["ArrowRight"]) {
-            moveX = this.speed;
+          if (input.keys["ArrowRight"]) {
+            moveX = this.speed * speedFactor;
             this.direction = 1;
-        }
+            }
 
-        if (input.keys["ArrowLeft"]) {
-            moveX = -this.speed;
+          if (input.keys["ArrowLeft"]) {
+            moveX = -this.speed * speedFactor;
             this.direction = -1;
-        }
+            }
 
         this.x += moveX;
 
@@ -49,7 +50,8 @@ export class Player {
         }
 
         // ===== GRAVIDADE =====
-        this.velocityY += this.gravity;
+        this.velocityY += this.gravity * speedFactor;
+        this.y += this.velocityY * speedFactor;
 
         // ===== COLISÃO HORIZONTAL =====
         for (let platform of this.game.platforms) {

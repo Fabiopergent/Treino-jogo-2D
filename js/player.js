@@ -3,23 +3,23 @@ import { gameState } from "./gameState.js";
 
 export class Player {
     constructor(x, y, game) {
-            this.game = game;
-            this.x = x;
-            this.y = y;
-            this.width = 36;
-            this.height = 36;
-            this.speed = 5;
-            this.velocityY = 0;
-            this.gravity = 0.5;
-            this.jumpForce = -10;
-            this.jumpCutMultiplier = 0.4;
-            this.onGround = false;
-            this.bullets = [];
-            this.shootCooldown = 0;
-            this.direction = 1;
+        this.game = game;
+        this.x = x;
+        this.y = y;
+        this.width = 36;
+        this.height = 36;
+        this.speed = 5;
+        this.velocityY = 0;
+        this.gravity = 0.5;
+        this.jumpForce = -10;
+        this.jumpCutMultiplier = 0.4;
+        this.onGround = false;
+        this.bullets = [];
+        this.shootCooldown = 0;
+        this.direction = 1;
 
-            // Invencibilidade temporária após tomar dano
-            this.invincible = 0;
+        // Invencibilidade temporária após tomar dano
+        this.invincible = 0;
     }
 
     update(input, deltaTime) {
@@ -44,7 +44,7 @@ export class Player {
                     this.x = platform.x - this.width;
                 if (moveX < 0 && this.x < platform.x + platform.width && this.x - moveX >= platform.x + platform.width)
                     this.x = platform.x + platform.width;
-             }
+            }
         }
 
         // ===== PULO =====
@@ -60,9 +60,9 @@ export class Player {
         this.velocityY += this.gravity * speedFactor;
         this.y += this.velocityY * speedFactor;
 
-       // ===== COLISÃO VERTICAL =====
+        // ===== COLISÃO VERTICAL =====
         this.onGround = false;
-            for (let platform of this.game.platforms) {
+        for (let platform of this.game.platforms) {
             if (!platform.active) continue;
             const overlapX = this.x + this.width > platform.x && this.x < platform.x + platform.width;
             if (!overlapX) continue;
@@ -72,6 +72,8 @@ export class Player {
                 this.y = platform.y - this.height;
                 this.velocityY = 0;
                 this.onGround = true;
+                // ✅ Notifica a plataforma que foi pisada — inicia o timer
+                platform.onPlayerLand();
             } else if (this.velocityY < 0 && this.y <= platform.y + platform.height && this.y >= platform.y) {
                 this.y = platform.y + platform.height;
                 this.velocityY = 0;
@@ -105,8 +107,8 @@ export class Player {
             }
         }
 
-          this.bullets.forEach(b => b.update(deltaTime));
-          this.bullets = this.bullets.filter(b => !b.markedForDeletion);
+        this.bullets.forEach(b => b.update(deltaTime));
+        this.bullets = this.bullets.filter(b => !b.markedForDeletion);
     }
 
     reset() {
@@ -114,6 +116,10 @@ export class Player {
         this.y = 100;
         this.velocityY = 0;
         this.onGround = false;
+        // ✅ Renova munição ao morrer para evitar loop sem munição
+        if (gameState.ammo < 10) {
+            gameState.ammo = 10;
+        }
     }
 
     draw(ctx) {

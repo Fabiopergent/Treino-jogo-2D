@@ -98,7 +98,7 @@ export class Game {
         this.bossSpawned   = false;
         this.lastTime      = 0;
         this.nextPlatformX = 800;
-        
+
         // Chão permanente
         this.platforms = [
             new Platform(0, 350, this.worldWidth, 50, true),
@@ -118,15 +118,15 @@ export class Game {
         this.animFrameId = requestAnimationFrame(this.loop.bind(this));
     }
 
-        loop(timestamp) {
-            if (!this.running) return;
-            if (this.lastTime === 0) this.lastTime = timestamp;
-            const deltaTime = Math.min(timestamp - this.lastTime, 50);
-            this.lastTime = timestamp;
-            this.update(deltaTime);
-            this.draw();
-            this.animFrameId = requestAnimationFrame(this.loop.bind(this));
-        }
+    loop(timestamp) {
+        if (!this.running) return;
+        if (this.lastTime === 0) this.lastTime = timestamp;
+        const deltaTime = Math.min(timestamp - this.lastTime, 50);
+        this.lastTime = timestamp;
+        this.update(deltaTime);
+        this.draw();
+        this.animFrameId = requestAnimationFrame(this.loop.bind(this));
+    }
 
     // ===========================
     update(deltaTime) {
@@ -152,9 +152,8 @@ export class Game {
             if (Math.abs(e.x - this.cameraX) < 1400) e.update(this.player, deltaTime);
         });
 
-        // Atualiza plataformas (timer)
+        // Atualiza plataformas (timer) — não deleta mais, elas reaparecem
         this.platforms.forEach(p => p.update(deltaTime));
-        this.platforms = this.platforms.filter(p => !p.markedForDeletion);
 
         // Atualiza itens
         this.items.forEach(i => i.update(deltaTime));

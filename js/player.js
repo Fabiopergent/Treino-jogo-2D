@@ -3,64 +3,64 @@ import { gameState } from "./gameState.js";
 
 export class Player {
     constructor(x, y, game) {
-            this.game = game;
+        this.game = game;
 
-            this.x = x;
-            this.y = y;
+        this.x = x;
+        this.y = y;
 
-            this.width = 40;
-            this.height = 40;
+        this.width = 40;
+        this.height = 40;
 
-            this.speed = 5;
-            this.velocityY = 0;
-            this.gravity = 0.5;
-            this.jumpForce = -10;
-            this.jumpCutMultiplier = 0.4;
+        this.speed = 5;
+        this.velocityY = 0;
+        this.gravity = 0.5;
+        this.jumpForce = -10;
+        this.jumpCutMultiplier = 0.4;
 
-            this.onGround = false;
+        this.onGround = false;
 
-            this.bullets = [];
-            this.shootCooldown = 0;
+        this.bullets = [];
+        this.shootCooldown = 0;
+        this.direction = 1;
+    }
+
+    update(input, deltaTime) {
+        const speedFactor = deltaTime / 16.6;
+
+        // ===== MOVIMENTO HORIZONTAL =====
+        let moveX = 0;
+        if (input.keys["ArrowRight"]) {
+            moveX = this.speed * speedFactor;
             this.direction = 1;
-            }
+        }
+        if (input.keys["ArrowLeft"]) {
+            moveX = -this.speed * speedFactor;
+            this.direction = -1;
+        }
 
-        update(input, deltaTime) {
-            const speedFactor = deltaTime / 16.6;
+        this.x += moveX;
 
-            // ===== MOVIMENTO HORIZONTAL =====
-            let moveX = 0;
-            if (input.keys["ArrowRight"]) {
-                moveX = this.speed * speedFactor;
-                this.direction = 1;
-            }
-            if (input.keys["ArrowLeft"]) {
-                moveX = -this.speed * speedFactor;
-                this.direction = -1;
-            }
+        // ===== LIMITES DO MUNDO (horizontal) =====
+        if (this.x < 0) this.x = 0;
+        if (this.x + this.width > this.game.worldWidth) {
+            this.x = this.game.worldWidth - this.width;
+        }
 
-            this.x += moveX;
+        // ===== COLISÃO HORIZONTAL =====
+        for (let platform of this.game.platforms) {
+            const overlapY =
+                this.y + this.height > platform.y &&
+                this.y < platform.y + platform.height;
 
-            // ===== LIMITES DO MUNDO (horizontal) =====
-            if (this.x < 0) this.x = 0;
-            if (this.x + this.width > this.game.worldWidth) {
-                this.x = this.game.worldWidth - this.width;
-            }
-
-            // ===== COLISÃO HORIZONTAL =====
-            for (let platform of this.game.platforms) {
-                const overlapY =
-                    this.y + this.height > platform.y &&
-                    this.y < platform.y + platform.height;
-
-                if (overlapY) {
-                    if (moveX > 0 && this.x + this.width > platform.x && this.x + this.width - moveX <= platform.x) {
-                        this.x = platform.x - this.width;
-                    }
-                    if (moveX < 0 && this.x < platform.x + platform.width && this.x - moveX >= platform.x + platform.width) {
-                        this.x = platform.x + platform.width;
-                    }
+            if (overlapY) {
+                if (moveX > 0 && this.x + this.width > platform.x && this.x + this.width - moveX <= platform.x) {
+                    this.x = platform.x - this.width;
+                }
+                if (moveX < 0 && this.x < platform.x + platform.width && this.x - moveX >= platform.x + platform.width) {
+                    this.x = platform.x + platform.width;
                 }
             }
+        }
 
         // ===== PULO =====
         if (input.keys["ArrowUp"] && this.onGround) {
@@ -120,8 +120,8 @@ export class Player {
             if (hit) {
                 gameState.takeDamage();
                 this.reset();
-                }
-                }
+            }
+        }
 
         // ===== TIRO =====
         if (this.shootCooldown > 0) this.shootCooldown--;
@@ -130,7 +130,8 @@ export class Player {
             this.shootCooldown = 20;
         }
 
-        this.bullets.forEach(b => b.update());
+        // ✅ Passa deltaTime para as balas também
+        this.bullets.forEach(b => b.update(deltaTime));
         this.bullets = this.bullets.filter(b => !b.markedForDeletion);
     }
 
@@ -139,9 +140,7 @@ export class Player {
         this.y = 100;
         this.velocityY = 0;
         this.onGround = false;
-        this.bullets = []; 
-        this.shootCooldown = 0;
-    }
+        }
 
     draw(ctx) {
         ctx.fillStyle = "red";
@@ -150,9 +149,8 @@ export class Player {
     }
 
     shoot() {
-        console.log("Balas ativas:", this.bullets.length); // Verifique se esse número reseta para 0 após morrer
-        const bulletX = this.direction === 1 ? this.x + this.width : this.x - 10;
-        const bulletY = this.y + this.height / 2;
-        this.bullets.push(new Bullet(bulletX, bulletY, this.direction));
-    }
+            const bulletX = this.direction === 1 ? this.x + this.width : this.x - 10;
+            const bulletY = this.y + this.height / 2;
+            this.bullets.push(new Bullet(bulletX, bulletY, this.direction));
+        }
 }

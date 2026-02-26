@@ -120,20 +120,20 @@ export class Game {
         this.player.update(this.input, deltaTime);
 
         this.enemies.forEach(enemy => {
-                if (Math.abs(enemy.x - this.cameraX) < 1200) {
-                    enemy.update(this.player, deltaTime);
-                }
-            });
+            if (Math.abs(enemy.x - this.cameraX) < 1200) {
+                enemy.update(this.player, deltaTime);
+            }
+        });
 
         // Câmera suavizada
-            const targetCamera = this.player.x - this.canvas.width / 2;
-            this.cameraX += (targetCamera - this.cameraX) * this.cameraSmooth;
-            if (this.cameraX < 0) this.cameraX = 0;
-            const maxCamera = this.worldWidth - this.canvas.width;
-            if (this.cameraX > maxCamera) this.cameraX = maxCamera;
+        const targetCamera = this.player.x - this.canvas.width / 2;
+        this.cameraX += (targetCamera - this.cameraX) * this.cameraSmooth;
+        if (this.cameraX < 0) this.cameraX = 0;
+        const maxCamera = this.worldWidth - this.canvas.width;
+        if (this.cameraX > maxCamera) this.cameraX = maxCamera;
 
-            this.generatePlatforms();
-            this.cleanupPlatforms();
+        this.generatePlatforms();
+        this.cleanupPlatforms();
 
         // Spawn de inimigos
         this.enemyTimer++;
@@ -144,10 +144,9 @@ export class Game {
             newEnemy.speed = 1 + (gameState.currentLevel * 0.2);
             this.enemies.push(newEnemy);
             this.enemyTimer = 0;
-            }
+        }
 
-
-        // Colisão bala vs inimigo
+            // Colisão bala vs inimigo
         this.player.bullets.forEach(bullet => {
             this.enemies.forEach(enemy => {
                 if (enemy.alive &&
@@ -174,9 +173,9 @@ export class Game {
             }
         });
 
-            this.enemies = this.enemies.filter(enemy => enemy.alive);
-            this.items = this.items.filter(i => !i.markedForDeletion);
-        }
+        this.enemies = this.enemies.filter(enemy => enemy.alive);
+        this.items = this.items.filter(i => !i.markedForDeletion);
+    }
 
     gameOver() {
         // ✅ Para o loop ANTES de mostrar o menu
@@ -184,26 +183,26 @@ export class Game {
 
         this.menu.style.display = "flex";
         this.menu.querySelector("h1").innerText = "GAME OVER";
-        }
+    }
 
     draw() {
-            this.ctx.fillStyle = "#87CEEB";
-            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillStyle = "#87CEEB";
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-            this.ctx.save();
-            this.ctx.translate(-Math.floor(this.cameraX), 0);
+        this.ctx.save();
+        this.ctx.translate(-Math.floor(this.cameraX), 0);
 
-            this.platforms.forEach(platform => platform.draw(this.ctx));
-            this.enemies.forEach(enemy => enemy.draw(this.ctx));
-            this.items.forEach(item => item.draw(this.ctx));
-            this.player.draw(this.ctx);
+        this.platforms.forEach(platform => platform.draw(this.ctx));
+        this.enemies.forEach(enemy => enemy.draw(this.ctx));
+        this.items.forEach(item => item.draw(this.ctx));
+        this.player.draw(this.ctx);
 
-            this.ctx.restore();
+        this.ctx.restore();
 
-            this.ctx.fillStyle = "white";
-            this.ctx.font = "20px Arial";
-            this.ctx.fillText("Vidas: " + gameState.lives, 20, 30);
-        }
+        this.ctx.fillStyle = "white";
+        this.ctx.font = "20px Arial";
+        this.ctx.fillText("Vidas: " + gameState.lives, 20, 30);
+    }
 
     cleanupPlatforms() {
         this.platforms = this.platforms.filter((platform, index) => {
@@ -226,7 +225,6 @@ export class Game {
             this.platforms.push(new Platform(this.nextPlatformX, y, width, height));
 
             this.nextPlatformX += this.platformSpacing + Math.random() * 120;
-            }
         }
-
+    }
 }

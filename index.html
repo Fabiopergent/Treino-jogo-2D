@@ -1,51 +1,30 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projeto Game em Java</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monster Attack</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
+<body class="landing">
+  <div class="landing-container">
+    <h1 class="site-title">🎮 Meus Jogos</h1>
+    <div class="games-grid">
+      <div class="game-card" onclick="window.location.href='game.html'">
+        <div class="game-card-art">👾</div>
+        <div class="game-card-info">
+          <h2>Monster Attack</h2>
+          <p>Sobreviva às ondas de monstros! Suba pelas plataformas, atire nos inimigos e chegue o mais longe possível.</p>
+          <button class="btn-play">▶ JOGAR</button>
+        </div>
+      </div>
+      <!-- Futuros jogos aqui -->
+    </div>
+  </div>
+</body>
+</html>
 
-
-
-<body>
-
-<div id="menu">
-    <h1>Monster Survival</h1>
-    <button id="startButton">JOGAR</button>
-</div>
-
-<button id="fullscreenBtn">Tela cheia</button>
-
-
-<canvas id="gameCanvas"></canvas>
-
-<style>
-    #menu {
-        position: absolute;
-        top: 0; left: 0;
-        width: 800px; height: 400px;
-        background: rgba(0,0,0,0.8);
-        color: white;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        z-index: 10;
-    }
-</style>
-
-<div id="mobileControls">
-    <button id="btnLeft">◀</button>
-    <button id="btnRight">▶</button>
-    <button id="btnJump">⤴</button>
-    <button id="btnShoot">🔥</button>
-</div>
-
-<script type="module" src="js/main.js"></script>
-
-<!-- ✅ SCRIPT FULLSCREEN NO FINAL -->
+<!-- ✅ SCRIPT FULLSCREEN NO FINAL --
 <script>
 const btn = document.getElementById("fullscreenBtn");
 
@@ -64,7 +43,4 @@ if (btn) {
         }
     });
 }
-</script>
-
-</body>
-</html>
+</script>-->

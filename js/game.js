@@ -1,230 +1,298 @@
-import { Player } from './player.js';
-import { Input } from './input.js';
+import { Player }   from './player.js';
+import { Input }    from './input.js';
 import { Platform } from './platform.js';
-import { Enemy } from './enemy.js';
+import { Enemy }    from './enemy.js';
+import { Item }     from './item.js';
+import { HUD }      from './hud.js';
 import { gameState } from './gameState.js';
-
 
 export class Game {
     constructor() {
         this.canvas = document.getElementById("gameCanvas");
-        this.ctx = this.canvas.getContext("2d");
-
-        this.canvas.width = 800;
+        this.ctx    = this.canvas.getContext("2d");
+        this.canvas.width  = 800;
         this.canvas.height = 400;
 
-        this.worldWidth = 2000;
-        this.cameraX = 0;
+        this.worldWidth   = 3000;
+        this.cameraX      = 0;
         this.cameraSmooth = 0.1;
 
         this.input = new Input();
+        this.hud   = new HUD(this.canvas);
 
-        this.enemyTimer = 0;
+        this.running      = false;
+        this.animFrameId  = null;
+        this.lastTime     = 0;
 
-        this.nextPlatformX = 800;
+        this.enemyTimer   = 0;
+        this.bossSpawned  = false;
+
+        this.nextPlatformX   = 800;
         this.platformSpacing = 180;
-        this.minPlatformWidth = 100;
-        this.maxPlatformWidth = 200;
 
-        this.platforms = [
-            new Platform(0, 350, 2000, 50),
-            new Platform(200, 280, 120, 20),
-            new Platform(400, 220, 120, 20),
-            new Platform(600, 300, 120, 20)
-        ];
+        this.platforms = [];
+        this.enemies   = [];
+        this.items     = [];
+        this.player    = null;
 
-        this.player = new Player(100, 100, this);
+        this._setupMenu();
+    }
 
-        this.lastTime = 0;
+    _setupMenu() {
+        const menu          = document.getElementById("menu");
+        const startBtn      = document.getElementById("startButton");
+        const gameOverScreen = document.getElementById("gameOverScreen");
+        const restartBtn    = document.getElementById("restartButton");
+        const menuBtn       = document.getElementById("menuButton");
 
-        this.enemies = [
-            new Enemy(500, 310, this),
-            new Enemy(900, 310, this)
-        ];
+        this.menuEl          = menu;
+        this.gameOverEl      = gameOverScreen;
 
-        this.items = [];
+        // Carrega scores na tabela
+        this._renderScores();
 
-        // ✅ Flag para controlar se o loop está ativo
-        this.running = false;
-        this.animFrameId = null;
-
-        this.menu = document.getElementById("menu");
-        this.startButton = document.getElementById("startButton");
-
-        this.startButton.addEventListener("click", () => {
-            this.menu.style.display = "none";
-            this.resetGame(); // ✅ Sempre reseta antes de iniciar
+        startBtn.addEventListener("click", () => {
+            const nameInput = document.getElementById("playerName");
+            const name = nameInput.value.trim() || "Player";
+            menu.style.display = "none";
+            this.resetGame(name);
             this.start();
+        });
+
+        restartBtn?.addEventListener("click", () => {
+            const name = gameState.playerName;
+            gameOverScreen.style.display = "none";
+            this.resetGame(name);
+            this.start();
+        });
+
+        menuBtn?.addEventListener("click", () => {
+            gameOverScreen.style.display = "none";
+            menu.style.display = "flex";
+            this._renderScores();
         });
     }
 
-    // ✅ Reseta todo o estado do jogo antes de cada partida
-    resetGame() {
-        this.cameraX = 0;
-        this.enemyTimer = 0;
+    _renderScores() {
+        const tbody = document.getElementById("scoresBody");
+        if (!tbody) return;
+        const scores = gameState.getScores();
+        if (scores.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="no-scores">Nenhum record ainda. Seja o primeiro!</td></tr>';
+            return;
+        }
+        tbody.innerHTML = scores.map((s, i) => `
+            <tr>
+                <td>${['🥇','🥈','🥉','4','5'][i]}</td>
+                <td>${s.name}</td>
+                <td>${s.score.toLocaleString()}</td>
+                <td>${s.level}</td>
+            </tr>`).join('');
+    }
+
+    resetGame(playerName = 'Player') {
+        gameState.reset(playerName);
+
+        this.cameraX       = 0;
+        this.enemyTimer    = 0;
+        this.bossSpawned   = false;
+        this.lastTime      = 0;
         this.nextPlatformX = 800;
-        this.lastTime = 0;
-
+        
+        // Chão permanente
         this.platforms = [
-            new Platform(0, 350, 2000, 50),
-            new Platform(200, 280, 120, 20),
-            new Platform(400, 220, 120, 20),
-            new Platform(600, 300, 120, 20)
+            new Platform(0, 350, this.worldWidth, 50, true),
+            new Platform(200, 280, 120, 18),
+            new Platform(400, 220, 120, 18),
+            new Platform(600, 300, 120, 18),
         ];
 
-        this.player = new Player(100, 100, this);
-
-        this.enemies = [
-            new Enemy(500, 310, this),
-            new Enemy(900, 310, this)
-        ];
-
-        this.items = [];
-
-        gameState.lives = 3;
-        gameState.currentLevel = 1;
+        this.player  = new Player(100, 280, this);
+        this.enemies = [new Enemy(600, 314, this, 'basic'), new Enemy(900, 314, this, 'basic')];
+        this.items   = [];
     }
 
     start() {
-        // ✅ Cancela qualquer loop anterior antes de iniciar um novo
-        if (this.animFrameId !== null) {
-            cancelAnimationFrame(this.animFrameId);
-        }
+        if (this.animFrameId) cancelAnimationFrame(this.animFrameId);
         this.running = true;
         this.animFrameId = requestAnimationFrame(this.loop.bind(this));
     }
 
-    loop(timestamp) {
-        // ✅ Se o loop foi parado, não continua
-        if (!this.running) return;
+        loop(timestamp) {
+            if (!this.running) return;
+            if (this.lastTime === 0) this.lastTime = timestamp;
+            const deltaTime = Math.min(timestamp - this.lastTime, 50);
+            this.lastTime = timestamp;
+            this.update(deltaTime);
+            this.draw();
+            this.animFrameId = requestAnimationFrame(this.loop.bind(this));
+        }
 
-        // Evita deltaTime gigante no primeiro frame após pausa
-        if (this.lastTime === 0) this.lastTime = timestamp;
-        const deltaTime = Math.min(timestamp - this.lastTime, 50); // ✅ Limita deltaTime a 50ms (evita saltos físicos)
-        this.lastTime = timestamp;
-
-        this.update(deltaTime);
-        this.draw();
-
-        this.animFrameId = requestAnimationFrame(this.loop.bind(this));
-    }
-
-    // ++++++++ Update =========
+    // ===========================
     update(deltaTime) {
-        // Checagem de Game Over
-        if (gameState.lives <= 0) {
-            this.gameOver();
-            return;
+        if (gameState.isGameOver) { this._triggerGameOver(); return; }
+
+        // Level progress
+        const leveledUp = gameState.updateLevel(deltaTime);
+        if (leveledUp) {
+            this.bossSpawned = false;
+            this._onLevelUp();
+        }
+
+        // Spawn boss no final do level (80% do progresso)
+        if (!this.bossSpawned && gameState.levelProgress >= 80) {
+            this._spawnBoss();
+            this.bossSpawned = true;
         }
 
         this.player.update(this.input, deltaTime);
 
-        this.enemies.forEach(enemy => {
-            if (Math.abs(enemy.x - this.cameraX) < 1200) {
-                enemy.update(this.player, deltaTime);
-            }
+        // Atualiza inimigos
+        this.enemies.forEach(e => {
+            if (Math.abs(e.x - this.cameraX) < 1400) e.update(this.player, deltaTime);
         });
 
-        // Câmera suavizada
-        const targetCamera = this.player.x - this.canvas.width / 2;
-        this.cameraX += (targetCamera - this.cameraX) * this.cameraSmooth;
-        if (this.cameraX < 0) this.cameraX = 0;
-        const maxCamera = this.worldWidth - this.canvas.width;
-        if (this.cameraX > maxCamera) this.cameraX = maxCamera;
+        // Atualiza plataformas (timer)
+        this.platforms.forEach(p => p.update(deltaTime));
+        this.platforms = this.platforms.filter(p => !p.markedForDeletion);
+
+        // Atualiza itens
+        this.items.forEach(i => i.update(deltaTime));
+
+        // Câmera
+        const targetCam = this.player.x - this.canvas.width / 2;
+        this.cameraX += (targetCam - this.cameraX) * this.cameraSmooth;
+        this.cameraX = Math.max(0, Math.min(this.worldWidth - this.canvas.width, this.cameraX));
 
         this.generatePlatforms();
         this.cleanupPlatforms();
 
-        // Spawn de inimigos
-        this.enemyTimer++;
-        if (this.enemyTimer > 300) {
-            const spawnX = this.cameraX + this.canvas.width + 100 + Math.random() * 200;
-            const spawnY = 310 + Math.random() * 10;
-            let newEnemy = new Enemy(spawnX, spawnY, this);
-            newEnemy.speed = 1 + (gameState.currentLevel * 0.2);
-            this.enemies.push(newEnemy);
+        // Spawn inimigos
+        this.enemyTimer += deltaTime;
+        const spawnInterval = this._spawnInterval();
+        if (this.enemyTimer >= spawnInterval) {
+            this._spawnEnemy();
             this.enemyTimer = 0;
         }
 
-            // Colisão bala vs inimigo
+        // Colisão bala vs inimigo
         this.player.bullets.forEach(bullet => {
             this.enemies.forEach(enemy => {
-                if (enemy.alive &&
-                    bullet.x < enemy.x + enemy.width &&
-                    bullet.x + bullet.width > enemy.x &&
-                    bullet.y < enemy.y + enemy.height &&
+                if (!enemy.alive || bullet.markedForDeletion) return;
+                if (bullet.x < enemy.x + enemy.width  &&
+                    bullet.x + bullet.width > enemy.x  &&
+                    bullet.y < enemy.y + enemy.height  &&
                     bullet.y + bullet.height > enemy.y) {
-
-                    enemy.takeDamage();
+                    enemy.takeDamage(1);
                     bullet.markedForDeletion = true;
+                    if (!enemy.alive) gameState.addKill(enemy.points);
                 }
             });
         });
 
         // Colisão player vs item
         this.items.forEach(item => {
-            if (this.player.x < item.x + item.width &&
+            if (item.markedForDeletion) return;
+            if (this.player.x < item.x + item.width  &&
                 this.player.x + this.player.width > item.x &&
                 this.player.y < item.y + item.height &&
                 this.player.y + this.player.height > item.y) {
-
-                if (item.type === 'heal') gameState.gainLife();
-                item.markedForDeletion = true;
+                item.apply(gameState);
             }
         });
 
-        this.enemies = this.enemies.filter(enemy => enemy.alive);
-        this.items = this.items.filter(i => !i.markedForDeletion);
+        this.enemies = this.enemies.filter(e => e.alive);
+        this.items   = this.items.filter(i => !i.markedForDeletion);
     }
 
-    gameOver() {
-        // ✅ Para o loop ANTES de mostrar o menu
-        this.running = false;
-
-        this.menu.style.display = "flex";
-        this.menu.querySelector("h1").innerText = "GAME OVER";
-    }
-
+    // ===========================
     draw() {
-        this.ctx.fillStyle = "#87CEEB";
+        // Fundo gradiente
+        const grad = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+        grad.addColorStop(0, '#87CEEB');
+        grad.addColorStop(1, '#c8e6f5');
+        this.ctx.fillStyle = grad;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.ctx.save();
         this.ctx.translate(-Math.floor(this.cameraX), 0);
 
-        this.platforms.forEach(platform => platform.draw(this.ctx));
-        this.enemies.forEach(enemy => enemy.draw(this.ctx));
-        this.items.forEach(item => item.draw(this.ctx));
+        this.platforms.forEach(p => p.draw(this.ctx));
+        this.items.forEach(i => i.draw(this.ctx));
+        this.enemies.forEach(e => e.draw(this.ctx));
         this.player.draw(this.ctx);
 
         this.ctx.restore();
 
-        this.ctx.fillStyle = "white";
-        this.ctx.font = "20px Arial";
-        this.ctx.fillText("Vidas: " + gameState.lives, 20, 30);
+        // HUD (por cima, sem câmera)
+        this.hud.draw();
+    }
+
+    // ===========================
+    _triggerGameOver() {
+        this.running = false;
+        gameState.saveScore();
+
+        document.getElementById("finalScore").textContent = gameState.score.toLocaleString();
+        document.getElementById("finalLevel").textContent = gameState.currentLevel;
+        document.getElementById("finalKills").textContent = gameState.kills;
+
+        this.gameOverEl.style.display = "flex";
+    }
+
+    _onLevelUp() {
+        // Adiciona velocidade ao spawn e ao world
+        console.log(`Level UP: ${gameState.currentLevel}`);
+    }
+
+    _spawnBoss() {
+        const spawnX = this.cameraX + this.canvas.width + 150;
+        const boss = new Enemy(spawnX, 314, this, 'boss');
+        boss.width  = 60;
+        boss.height = 60;
+        this.enemies.push(boss);
+    }
+
+    _spawnEnemy() {
+        const lvl = gameState.currentLevel;
+        const spawnX = this.cameraX + this.canvas.width + 100 + Math.random() * 300;
+        const spawnY = 314;
+
+        // Tipos disponíveis por level
+        let pool = ['basic'];
+        if (lvl >= 3)  pool.push('fast');
+        if (lvl >= 5)  pool.push('jumper');
+        if (lvl >= 8)  pool.push('tank');
+
+        // Metade do level aumenta a frequência (já tratada no interval)
+        const type = pool[Math.floor(Math.random() * pool.length)];
+        const enemy = new Enemy(spawnX, spawnY, this, type);
+
+        // Escala a velocidade base com o level
+        enemy.speed += (lvl - 1) * 0.08;
+
+        this.enemies.push(enemy);
+    }
+
+    _spawnInterval() {
+        // Começa em 4s, reduz até 1s no level 20
+        const lvl = gameState.currentLevel;
+        return Math.max(1000, 4000 - (lvl - 1) * 160);
     }
 
     cleanupPlatforms() {
-        this.platforms = this.platforms.filter((platform, index) => {
-            if (index === 0) return true;
-            return platform.x + platform.width > this.cameraX - 500;
+        this.platforms = this.platforms.filter((p, i) => {
+            if (p.permanent) return true;
+            return p.x + p.width > this.cameraX - 500;
         });
     }
 
     generatePlatforms() {
-        while (this.nextPlatformX < this.cameraX + this.canvas.width + 400) {
-            const width =
-                this.minPlatformWidth +
-                Math.random() * (this.maxPlatformWidth - this.minPlatformWidth);
-
-            const height = 20;
-            const minY = 180;
-            const maxY = 320;
-            const y = minY + Math.random() * (maxY - minY);
-
-            this.platforms.push(new Platform(this.nextPlatformX, y, width, height));
-
-            this.nextPlatformX += this.platformSpacing + Math.random() * 120;
+        while (this.nextPlatformX < this.cameraX + this.canvas.width + 500) {
+            const w = 100 + Math.random() * 120;
+            const y = 160 + Math.random() * 160;
+            this.platforms.push(new Platform(this.nextPlatformX, y, w, 18));
+            this.nextPlatformX += 160 + Math.random() * 130;
         }
     }
 }

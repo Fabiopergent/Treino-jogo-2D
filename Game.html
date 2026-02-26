@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monster Attack</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="game-page">
+
+  <!-- ===== MENU / TELA INICIAL ===== -->
+  <div id="menu">
+    <div class="menu-inner">
+      <h1 class="game-title">👾 Monster Attack</h1>
+
+      <!-- Input de nome -->
+      <div class="name-section">
+        <label for="playerName">Seu nome:</label>
+        <input type="text" id="playerName" maxlength="12" placeholder="Digite seu nome..." autocomplete="off">
+      </div>
+
+      <button id="startButton" class="btn-start">▶ INICIAR</button>
+
+      <!-- Tabela de scores -->
+      <div class="scores-container">
+        <h3>🏆 Top 5 Records</h3>
+        <table class="scores-table">
+          <thead>
+            <tr><th>#</th><th>Nome</th><th>Score</th><th>Level</th></tr>
+          </thead>
+          <tbody id="scoresBody">
+            <tr><td colspan="4" class="no-scores">Nenhum record ainda. Seja o primeiro!</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TELA DE GAME OVER ===== -->
+  <div id="gameOverScreen" style="display:none;">
+    <div class="menu-inner">
+      <h1 class="game-title gameover-title">💀 GAME OVER</h1>
+      <div class="final-stats">
+        <p>Score: <span id="finalScore">0</span></p>
+        <p>Level: <span id="finalLevel">1</span></p>
+        <p>Monstros: <span id="finalKills">0</span></p>
+      </div>
+      <button id="restartButton" class="btn-start">↺ JOGAR NOVAMENTE</button>
+      <button id="menuButton" class="btn-secondary">☰ MENU</button>
+    </div>
+  </div>
+
+  <!-- ===== BOTÃO FULLSCREEN ===== -->
+  <button id="fullscreenBtn">⛶</button>
+
+  <!-- ===== CANVAS ===== -->
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- ===== CONTROLES MOBILE ===== -->
+  <div id="mobileControls">
+    <button id="btnLeft">◀</button>
+    <button id="btnRight">▶</button>
+    <button id="btnJump">⤴</button>
+    <button id="btnShoot">🔥</button>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+
+  <script>
+    // Fullscreen
+    const btn = document.getElementById("fullscreenBtn");
+    if (btn) {
+      btn.addEventListener("click", async () => {
+        try {
+          if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
+          else await document.exitFullscreen();
+        } catch (err) { console.log("Erro fullscreen:", err); }
+      });
+    }
+  </script>
+</body>
+</html>

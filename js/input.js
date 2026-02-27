@@ -152,6 +152,6 @@ export class Input {
         document.querySelectorAll('.weapon-btn').forEach(b => b.classList.remove('active'));
         const target = document.querySelector(`[data-weapon="${type}"]`);
         if (target) target.classList.add('active');
-   
-    }
+        }
+
 }

@@ -1,14 +1,14 @@
 export class Bullet {
-    constructor(x, y, direction) {
+    constructor(x, y, direction, speed = 10) {
         this.x = x;
         this.y = y;
         this.width = 10;
         this.height = 4;
-        this.speed = 10;
+        this.speed = speed;
         this.direction = direction;
         this.markedForDeletion = false;
     }
-    
+
     update(deltaTime = 16.6) {
         const speedFactor = deltaTime / 16.6;
         this.x += this.speed * this.direction * speedFactor;

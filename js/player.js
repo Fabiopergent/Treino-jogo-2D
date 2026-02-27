@@ -17,6 +17,7 @@ export class Player {
         this.bullets = [];
         this.shootCooldown = 0;
         this.direction = 1;
+        this.knifeFlash = 0;
 
         // Invencibilidade temporária após tomar dano
         this.invincible = 0;
@@ -98,12 +99,15 @@ export class Player {
             }
         }
 
-        // ===== TIRO =====
+        // ===== TIRO / ATAQUE =====
         if (this.shootCooldown > 0) this.shootCooldown -= deltaTime;
         if (input.keys[" "] && this.shootCooldown <= 0) {
-            if (gameState.shoot()) {
+            if (gameState.currentWeapon === 'knife') {
+                this._knifeAttack();
+                this.shootCooldown = 500; // faca mais lenta
+            } else if (gameState.shoot()) {
                 this.shoot();
-                this.shootCooldown = 300; // ms entre tiros
+                this.shootCooldown = gameState.currentWeapon === 'rifle' ? 150 : 300;
             }
         }
 
@@ -138,12 +142,50 @@ export class Player {
         ctx.fillRect(this.x + (this.direction > 0 ? 11 : 8), this.y + 11, 4, 4);
         ctx.fillRect(this.x + (this.direction > 0 ? 27 : 24), this.y + 11, 4, 4);
 
+        // Flash de facada
+        if (this.knifeFlash > 0) {
+            this.knifeFlash -= 16;
+            const kx = this.direction === 1 ? this.x + this.width : this.x - 50;
+            ctx.save();
+            ctx.globalAlpha = this.knifeFlash / 200;
+            ctx.fillStyle = '#fff';
+            ctx.font = '28px Arial';
+            ctx.fillText('⚡', kx, this.y + 20);
+            ctx.restore();
+        }
+
         this.bullets.forEach(b => b.draw(ctx));
     }
 
     shoot() {
         const bulletX = this.direction === 1 ? this.x + this.width : this.x - 10;
         const bulletY = this.y + this.height / 2;
-        this.bullets.push(new Bullet(bulletX, bulletY, this.direction));
+        // Fuzil tem bala mais rápida
+        const speed = gameState.currentWeapon === 'rifle' ? 16 : 10;
+        this.bullets.push(new Bullet(bulletX, bulletY, this.direction, speed));
+    }
+
+    _knifeAttack() {
+        // Área de dano à frente do personagem
+        const range = 50;
+        const knifeX = this.direction === 1 ? this.x + this.width : this.x - range;
+        const knifeY = this.y;
+        const knifeW = range;
+        const knifeH = this.height;
+
+        for (let enemy of this.game.enemies) {
+            if (!enemy.alive) continue;
+            const hit = knifeX < enemy.x + enemy.width &&
+                        knifeX + knifeW > enemy.x &&
+                        knifeY < enemy.y + enemy.height &&
+                        knifeY + knifeH > enemy.y;
+            if (hit) {
+                enemy.takeDamage(1);
+                if (!enemy.alive) gameState.addKill(enemy.points);
+            }
+        }
+
+        // Flash visual de facada
+        this.knifeFlash = 200;
     }
 }

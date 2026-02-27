@@ -16,6 +16,7 @@ export const gameState = {
     ammo: 30,
     maxAmmo: 30,
     weaponName: 'Pistola',
+    currentWeapon: 'pistol', // 'knife', 'pistol', 'rifle'
 
     // ===== SCORE =====
     score: 0,
@@ -117,6 +118,7 @@ export const gameState = {
         this.maxAmmo = 30;
         this.weaponIcon = '🔫';
         this.weaponName = 'Pistola';
+        this.currentWeapon = 'pistol';
         this.score = 0;
         this.kills = 0;
         this.isGameOver = false;

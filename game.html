@@ -56,12 +56,38 @@
   <!-- ===== CANVAS ===== -->
   <canvas id="gameCanvas"></canvas>
 
-  <!-- ===== CONTROLES MOBILE ===== -->
+  <!-- ===== CONTROLES MOBILE ESTILO FREE FIRE ===== -->
   <div id="mobileControls">
-    <button id="btnLeft">◀</button>
-    <button id="btnRight">▶</button>
-    <button id="btnJump">⤴</button>
-    <button id="btnShoot">🔥</button>
+
+    <!-- SELEÇÃO DE ARMAS (topo centro) -->
+    <div id="weaponBar">
+      <button class="weapon-btn active" id="weaponKnife"  data-weapon="knife">
+        <span class="weapon-icon">🔪</span>
+        <span class="weapon-label">Faca</span>
+      </button>
+      <button class="weapon-btn" id="weaponPistol" data-weapon="pistol">
+        <span class="weapon-icon">🔫</span>
+        <span class="weapon-label">Pistola</span>
+      </button>
+      <button class="weapon-btn" id="weaponRifle"  data-weapon="rifle">
+        <span class="weapon-icon">🪖</span>
+        <span class="weapon-label">Fuzil</span>
+      </button>
+    </div>
+
+    <!-- JOYSTICK ESQUERDO (movimento) -->
+    <div id="joystickZone">
+      <div id="joystickBase">
+        <div id="joystickKnob"></div>
+      </div>
+    </div>
+
+    <!-- BOTÕES DIREITA (ação) -->
+    <div id="actionButtons">
+      <button id="btnJump"  class="action-btn jump-btn">⬆<span>PULO</span></button>
+      <button id="btnShoot" class="action-btn shoot-btn">🔥<span>ATIRAR</span></button>
+    </div>
+
   </div>
 
   <script type="module" src="js/main.js"></script>

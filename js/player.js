@@ -103,14 +103,11 @@ export class Player {
     }
 
     reset() {
-        this.x = 100;
-        this.y = 100;
+        // ✅ Só reseta física, NÃO muda posição — jogador fica onde está
         this.velocityY = 0;
-        this.onGround = false;
-        // ✅ Renova munição ao morrer para evitar loop sem munição
-        if (gameState.ammo < 10) {
-            gameState.ammo = 10;
-        }
+        this.onGround  = false;
+        // Munição mínima garantida ao morrer
+        if (gameState.weapons.pistol.ammo < 10) gameState.weapons.pistol.ammo = 10;
     }
 
     draw(ctx) {

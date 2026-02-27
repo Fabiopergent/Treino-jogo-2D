@@ -49,15 +49,20 @@ export class HUD {
 
         // --- Ícone da arma + munição ---
         const weaponY = hpY + barH + (gameState.armor > 0 ? 16 : 6);
+        const w = gameState.weapons[gameState.currentWeapon];
+        const ammoDisplay = w.ammo === Infinity ? '∞' : w.ammo;
+        const maxDisplay  = w.maxAmmo === Infinity ? '∞' : w.maxAmmo;
+        const ammoLow     = w.ammo !== Infinity && w.ammo <= 5;
+
         ctx.save();
         ctx.font = '18px Arial';
-        ctx.fillText(gameState.weaponIcon, leftX, weaponY + 14);
+        ctx.fillText(w.icon, leftX, weaponY + 14);
         ctx.font = 'bold 12px Arial';
-        ctx.fillStyle = gameState.ammo <= 5 ? '#fc8181' : '#e2e8f0';
-        ctx.fillText(`${gameState.ammo}/${gameState.maxAmmo}`, leftX + 24, weaponY + 14);
+        ctx.fillStyle = ammoLow ? '#fc8181' : '#e2e8f0';
+        ctx.fillText(`${ammoDisplay}/${maxDisplay}`, leftX + 24, weaponY + 14);
         ctx.font = '10px Arial';
         ctx.fillStyle = '#718096';
-        ctx.fillText(gameState.weaponName, leftX + 24, weaponY + 25);
+        ctx.fillText(w.name, leftX + 24, weaponY + 25);
         ctx.restore();
 
         // ===========================

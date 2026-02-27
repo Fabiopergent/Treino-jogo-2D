@@ -59,17 +59,20 @@ export class Item {
     apply(gameState) {
         switch (this.type) {
             case 'heal':   gameState.gainHP(30); break;
-            case 'ammo':   gameState.gainAmmo(10); break;
+            case 'ammo':
+                // Munição vai para pistola se tiver espaço, senão fuzil
+                if (gameState.weapons.pistol.ammo < gameState.weapons.pistol.maxAmmo) {
+                    gameState.gainAmmo('pistol', 10);
+                } else {
+                    gameState.gainAmmo('rifle', 15);
+                }
+                break;
             case 'armor':  gameState.gainArmor(50); break;
             case 'weapon':
-                // Upgrade simples de arma (expande futuramente)
-                if (gameState.weaponName === 'Pistola') {
-                    gameState.weaponName = 'Escopeta';
-                    gameState.weaponIcon = '🔫';
-                    gameState.maxAmmo = 20;
-                    gameState.ammo = Math.min(gameState.ammo + 20, 20);
-                } else {
-                    gameState.gainAmmo(15);
+                // Dá munição de fuzil como upgrade
+                gameState.gainAmmo('rifle', 20);
+                if (gameState.weapons.rifle.ammo > 0 && gameState.currentWeapon === 'knife') {
+                    gameState.currentWeapon = 'rifle';
                 }
                 break;
         }

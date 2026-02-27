@@ -10,6 +10,10 @@ export class Enemy {
         this.height = 36;
         this.alive = true;
         this.flash = 0;
+        this.attackFlash = 0;
+        this.attackCooldown = 0;
+        // Boss ataca mais rápido, tanque mais devagar
+        this.attackInterval = type === 'boss' ? 800 : type === 'tank' ? 2000 : 1200;
 
         // Física
         this.velocityY = 0;
@@ -69,19 +73,41 @@ export class Enemy {
 
         const speedFactor = deltaTime / 16.6;
 
-        // ===== PERSEGUIÇÃO =====
-        const direction = (player.x > this.x) ? 1 : -1;
-        this.x += this.speed * direction * speedFactor;
+        // ===== DISTÂNCIA ATÉ O PLAYER =====
+        const dx = player.x - this.x;
+        const distX = Math.abs(dx);
+        const direction = dx > 0 ? 1 : -1;
+
+        // Zona de ataque: para quando está perto o suficiente
+        const attackRange = this.width + player.width - 8;
+        const inAttackRange = distX <= attackRange &&
+            Math.abs((this.y + this.height / 2) - (player.y + player.height / 2)) < 50;
+
+        // ===== ATAQUE CORPO A CORPO =====
+        if (this.attackCooldown > 0) this.attackCooldown -= deltaTime;
+
+        if (inAttackRange) {
+            // Para de andar, só ataca
+            if (this.attackCooldown <= 0) {
+                this.attackFlash = 200;
+                this.attackCooldown = this.attackInterval;
+                // Causa dano ao player via gameState (importado no game.js)
+                this.game.onEnemyHitPlayer();
+            }
+        } else {
+            // ===== PERSEGUIÇÃO (só anda se fora da zona de ataque) =====
+            this.x += this.speed * direction * speedFactor;
+        }
 
         // ===== SEPARAÇÃO entre inimigos (evita sobreposição) =====
         for (let other of this.game.enemies) {
             if (other === this || !other.alive) continue;
-            const dx = this.x - other.x;
-            const dist = Math.abs(dx);
+            const odx = this.x - other.x;
+            const dist = Math.abs(odx);
             const minDist = this.width - 4;
             if (dist < minDist) {
                 const push = (minDist - dist) * 0.3;
-                this.x += dx > 0 ? push : -push;
+                this.x += odx > 0 ? push : -odx > 0 ? -push : push;
             }
         }
 
@@ -126,25 +152,22 @@ export class Enemy {
 
     draw(ctx) {
         if (!this.alive) return;
-
-        const isBoss = this.type === 'boss';
-
-        // Pisca branco ao tomar dano
+        
         ctx.fillStyle = this.flash > 0 ? '#ffffff' : this.color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
 
-        // Barra de HP (sempre visível em boss, visível se levou dano nos outros)
-        if (isBoss || this.hp < this.maxHp) {
+        // Barra de HP
+        if (this.type === 'boss' || this.hp < this.maxHp) {
             const bw = this.width;
-            const bh = isBoss ? 6 : 4;
+            const bh = this.type === 'boss' ? 6 : 4;
             const by = this.y - bh - 2;
             ctx.fillStyle = '#300';
             ctx.fillRect(this.x, by, bw, bh);
-            ctx.fillStyle = isBoss ? '#f6c90e' : '#e53e3e';
+            ctx.fillStyle = this.type === 'boss' ? '#f6c90e' : '#e53e3e';
             ctx.fillRect(this.x, by, bw * (this.hp / this.maxHp), bh);
         }
 
-        // Olhos simples
+        // Olhos
         ctx.fillStyle = this.flash > 0 ? '#e53e3e' : '#fff';
         ctx.fillRect(this.x + 7,  this.y + 10, 8, 8);
         ctx.fillRect(this.x + 21, this.y + 10, 8, 8);
@@ -152,8 +175,18 @@ export class Enemy {
         ctx.fillRect(this.x + 10, this.y + 13, 4, 4);
         ctx.fillRect(this.x + 24, this.y + 13, 4, 4);
 
-        // Label de boss
-        if (isBoss) {
+        // ✅ Flash de ataque (garra/soco à frente)
+        if (this.attackFlash > 0) {
+            this.attackFlash -= 16;
+            const ax = this.x > 0 ? this.x - 20 : this.x + this.width;
+            ctx.save();
+            ctx.globalAlpha = Math.min(1, this.attackFlash / 150);
+            ctx.font = '22px Arial';
+            ctx.fillText('👊', ax, this.y + this.height / 2);
+            ctx.restore();
+        }
+
+        if (this.type === 'boss') {
             ctx.fillStyle = '#f6c90e';
             ctx.font = 'bold 10px Arial';
             ctx.textAlign = 'center';

@@ -82,22 +82,9 @@ export class Player {
         }
 
         // ===== COLISÃO COM INIMIGOS =====
-        if (this.invincible > 0) {
-            this.invincible -= deltaTime;
-        } else {
-            for (let enemy of this.game.enemies) {
-                if (!enemy.alive) continue;
-                const hit = this.x < enemy.x + enemy.width && this.x + this.width > enemy.x &&
-                            this.y < enemy.y + enemy.height && this.y + this.height > enemy.y;
-                if (hit) {
-                    gameState.takeDamage(34);
-                    this.invincible = 1500; // 1.5s de invencibilidade
-                    if (gameState.isGameOver) return;
-                    this.reset();
-                    break;
-                }
-            }
-        }
+        // O dano agora é tratado pelo enemy.js via game.onEnemyHitPlayer()
+        // Aqui só garante invencibilidade após respawn
+        if (this.invincible > 0) this.invincible -= deltaTime;
 
         // ===== TIRO / ATAQUE =====
         if (this.shootCooldown > 0) this.shootCooldown -= deltaTime;

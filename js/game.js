@@ -228,6 +228,16 @@ export class Game {
     }
 
     // ===========================
+    // Chamado pelo inimigo quando acerta o player
+    onEnemyHitPlayer() {
+        if (!this.player || gameState.isGameOver) return;
+        if (this.player.invincible > 0) return; // já está invencível
+        gameState.takeDamage(34);
+        this.player.invincible = 1500;
+        if (gameState.isGameOver) return;
+        this.player.reset();
+    }
+
     _triggerGameOver() {
         this.running = false;
         gameState.saveScore();

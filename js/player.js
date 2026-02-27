@@ -30,6 +30,7 @@ export class Player {
         let moveX = 0;
         if (input.keys["ArrowRight"]) { moveX =  this.speed * speedFactor; this.direction =  1; }
         if (input.keys["ArrowLeft"])  { moveX = -this.speed * speedFactor; this.direction = -1; }
+        // ✅ ArrowUp e ArrowDown NUNCA mudam direction — só servem para pulo
         this.x += moveX;
 
         // ===== LIMITES =====
@@ -142,10 +143,10 @@ export class Player {
     }
 
     shoot() {
+        // ✅ Tiro sempre horizontal na direção que o personagem está virado
         const bulletX = this.direction === 1 ? this.x + this.width : this.x - 10;
-        const bulletY = this.y + this.height / 2;
-        // Fuzil tem bala mais rápida
-        const speed = gameState.currentWeapon === 'rifle' ? 16 : 10;
+        const bulletY = this.y + this.height / 2 - 2; // centro do personagem
+        const speed   = gameState.currentWeapon === 'rifle' ? 16 : 10;
         this.bullets.push(new Bullet(bulletX, bulletY, this.direction, speed));
     }
 

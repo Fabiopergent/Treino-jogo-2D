@@ -144,30 +144,14 @@ export class Input {
     }
 
     _selectWeapon(type) {
-        // Atualiza visual
+        // ✅ Só atualiza currentWeapon — nome/ícone vêm dos getters do gameState
+        if (!gameState.weapons[type]) return;
+        gameState.currentWeapon = type;
+
+        // Atualiza visual dos botões
         document.querySelectorAll('.weapon-btn').forEach(b => b.classList.remove('active'));
         const target = document.querySelector(`[data-weapon="${type}"]`);
         if (target) target.classList.add('active');
-
-        // Atualiza gameState
-        switch (type) {
-            case 'knife':
-                gameState.weaponName = 'Faca';
-                gameState.weaponIcon = '🔪';
-                gameState.currentWeapon = 'knife';
-                break;
-            case 'pistol':
-                gameState.weaponName = 'Pistola';
-                gameState.weaponIcon = '🔫';
-                gameState.currentWeapon = 'pistol';
-                if (gameState.ammo === 0) gameState.ammo = 5; // dá uns tiros se estava zerado
-                break;
-            case 'rifle':
-                gameState.weaponName = 'Fuzil';
-                gameState.weaponIcon = '🪖';
-                gameState.currentWeapon = 'rifle';
-                if (gameState.ammo === 0) gameState.ammo = 5;
-                break;
-        }
+   
     }
 }

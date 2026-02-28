@@ -53,18 +53,22 @@ export class Enemy {
 
     die() {
         this.alive = false;
-
-        // Drops aleatórios
+        
         const roll = Math.random();
-        if (roll < 0.35) {
-            // 35% chance: munição
-            this.game.items.push(new Item(this.x, this.y, 'ammo'));
-        } else if (roll < 0.50) {
-            // 15% chance: vida
-            this.game.items.push(new Item(this.x, this.y, 'heal'));
-        } else if (roll < 0.55) {
-            // 5% chance: colete
-            this.game.items.push(new Item(this.x, this.y, 'armor'));
+        if (roll < 0.60) {
+            // 60% chance: munição de pistola
+            this.game.items.push(new Item(this.x, this.y, 'ammo_pistol'));
+        } else if (roll < 0.60 + 0.40) {
+            // 40% chance: munição de fuzil (sempre dropa alguma munição)
+            this.game.items.push(new Item(this.x, this.y, 'ammo_rifle'));
+        }
+
+        // Drops extras independentes (mais raros)
+        const extraRoll = Math.random();
+        if (extraRoll < 0.08) {
+            this.game.items.push(new Item(this.x + 20, this.y, 'heal'));
+        } else if (extraRoll < 0.12) {
+            this.game.items.push(new Item(this.x + 20, this.y, 'armor'));
         }
     }
 
@@ -152,7 +156,7 @@ export class Enemy {
 
     draw(ctx) {
         if (!this.alive) return;
-        
+
         ctx.fillStyle = this.flash > 0 ? '#ffffff' : this.color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
 

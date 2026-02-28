@@ -60,9 +60,9 @@ export class Game {
         });
 
         restartBtn?.addEventListener("click", () => {
-                gameOverScreen.style.display = "none";
-                this.resetGame(gameState.playerName);
-                this.start();
+            gameOverScreen.style.display = "none";
+            this.resetGame(gameState.playerName);
+            this.start();
         });
 
         menuBtn?.addEventListener("click", () => {
@@ -130,8 +130,8 @@ export class Game {
         this.animFrameId = requestAnimationFrame(this.loop.bind(this));
     }
 
-        update(deltaTime) {
-            if (gameState.isGameOver) { this._triggerGameOver(); return; }
+    update(deltaTime) {
+        if (gameState.isGameOver) { this._triggerGameOver(); return; }
 
         // ===== SISTEMA DE LEVEL POR KILLS ===== ✅
         // Boss spawn: quando kills atingiu o alvo e boss ainda não foi spawnado
@@ -149,14 +149,14 @@ export class Game {
             this._showLevelUp();
         }
 
-            this.player.update(this.input, deltaTime);
+        this.player.update(this.input, deltaTime);
 
-            this.enemies.forEach(e => {
-                if (Math.abs(e.x - this.cameraX) < 1400) e.update(this.player, deltaTime);
-            });
+        this.enemies.forEach(e => {
+            if (Math.abs(e.x - this.cameraX) < 1400) e.update(this.player, deltaTime);
+        });
 
-            this.platforms.forEach(p => p.update(deltaTime));
-            this.items.forEach(i => i.update(deltaTime));
+        this.platforms.forEach(p => p.update(deltaTime));
+        this.items.forEach(i => i.update(deltaTime));
 
         // Câmera
         const targetCam = this.player.x - this.canvas.width / 2;
@@ -211,24 +211,24 @@ export class Game {
         this.items   = this.items.filter(i => !i.markedForDeletion);
     }
 
-        draw() {
-            const grad = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-            grad.addColorStop(0, '#87CEEB');
-            grad.addColorStop(1, '#c8e6f5');
-            this.ctx.fillStyle = grad;
-            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    draw() {
+        const grad = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+        grad.addColorStop(0, '#87CEEB');
+        grad.addColorStop(1, '#c8e6f5');
+        this.ctx.fillStyle = grad;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-            this.ctx.save();
-            this.ctx.translate(-Math.floor(this.cameraX), 0);
+        this.ctx.save();
+        this.ctx.translate(-Math.floor(this.cameraX), 0);
 
-            this.platforms.forEach(p => p.draw(this.ctx));
-            this.items.forEach(i => i.draw(this.ctx));
-            this.enemies.forEach(e => e.draw(this.ctx));
-            this.player.draw(this.ctx);
+        this.platforms.forEach(p => p.draw(this.ctx));
+        this.items.forEach(i => i.draw(this.ctx));
+        this.enemies.forEach(e => e.draw(this.ctx));
+        this.player.draw(this.ctx);
 
-            this.ctx.restore();
+        this.ctx.restore();
 
-            this.hud.draw();
+        this.hud.draw();
 
         // Aviso de boss chegando
         if (this.bossActive) {
@@ -252,14 +252,14 @@ export class Game {
         // ✅ NÃO faz reset de posição — player fica onde está
     }
 
-        _triggerGameOver() {
-            this.running = false;
-            gameState.saveScore();
-            document.getElementById("finalScore").textContent = gameState.score.toLocaleString();
-            document.getElementById("finalLevel").textContent = gameState.currentLevel;
-            document.getElementById("finalKills").textContent = gameState.kills;
-            this.gameOverEl.style.display = "flex";
-        }
+    _triggerGameOver() {
+        this.running = false;
+        gameState.saveScore();
+        document.getElementById("finalScore").textContent = gameState.score.toLocaleString();
+        document.getElementById("finalLevel").textContent = gameState.currentLevel;
+        document.getElementById("finalKills").textContent = gameState.kills;
+        this.gameOverEl.style.display = "flex";
+    }
 
     _showLevelUp() {
         // Mensagem visual de level up (simples por enquanto)
@@ -275,15 +275,15 @@ export class Game {
         this.enemies.push(boss);
     }
 
-        _spawnEnemy() {
-            const lvl = gameState.currentLevel;
+    _spawnEnemy() {
+        const lvl = gameState.currentLevel;
 
-            let pool = ['basic'];
-            if (lvl >= 2) pool.push('fast');
-            if (lvl >= 3) pool.push('jumper');
-            if (lvl >= 5) pool.push('tank');
+        let pool = ['basic'];
+        if (lvl >= 2) pool.push('fast');
+        if (lvl >= 3) pool.push('jumper');
+        if (lvl >= 5) pool.push('tank');
 
-            const type = pool[Math.floor(Math.random() * pool.length)];
+        const type = pool[Math.floor(Math.random() * pool.length)];
 
         // ✅ Spawna dos dois lados alternadamente ou aleatoriamente
         const fromRight = Math.random() > 0.5;
@@ -306,29 +306,61 @@ export class Game {
     cleanupPlatforms() {
         this.platforms = this.platforms.filter(p => {
             if (p.permanent) return true;
-            // Só remove se estiver MUITO longe da câmera (1200px de cada lado)
-            return p.x + p.width > this.cameraX - 1200 &&
-                   p.x < this.cameraX + this.canvas.width + 1200;
+            return p.x + p.width > this.cameraX - 1400 &&
+                   p.x < this.cameraX + this.canvas.width + 1400;
         });
     }
 
-    // ✅ Gera plataformas nos dois sentidos
-    generatePlatforms() {
-        // Para a direita
-        while (this.nextPlatformXRight < this.cameraX + this.canvas.width + 600) {
-            const w = 100 + Math.random() * 120;
-            const y = 160 + Math.random() * 160;
-            this.platforms.push(new Platform(this.nextPlatformXRight, y, w, 18));
-            this.nextPlatformXRight += 160 + Math.random() * 130;
+        generatePlatforms() {
+            this._genDir('right');
+            this._genDir('left');
         }
 
-        // Para a esquerda (gera enquanto câmera se aproxima do início)
-        while (this.nextPlatformXLeft > this.cameraX - 600) {
-            this.nextPlatformXLeft -= 160 + Math.random() * 130;
-            if (this.nextPlatformXLeft < 0) break;
-            const w = 100 + Math.random() * 120;
-            const y = 160 + Math.random() * 160;
-            this.platforms.push(new Platform(this.nextPlatformXLeft, y, w, 18));
+    _genDir(dir) {
+        const limit = dir === 'right'
+            ? this.cameraX + this.canvas.width + 700
+            : this.cameraX - 700;
+
+        const shouldContinue = () => dir === 'right'
+            ? this.nextPlatformXRight < limit
+            : this.nextPlatformXLeft > limit;
+
+        while (shouldContinue()) {
+            const w   = 100 + Math.random() * 120;
+            const h   = 18;
+            const gap = 200 + Math.random() * 150; // ✅ gap maior evita sobreposição
+
+            // ✅ Y em faixas fixas de 45px — evita plataformas em cima umas das outras
+            const slot = Math.floor(Math.random() * 5);
+            const y    = 155 + slot * 45; // faixas: 155, 200, 245, 290, 335
+
+            let x;
+            if (dir === 'right') {
+                x = this.nextPlatformXRight;
+                this.nextPlatformXRight += gap;
+            } else {
+                this.nextPlatformXLeft -= gap;
+                if (this.nextPlatformXLeft < 0) break;
+                x = this.nextPlatformXLeft;
+            }
+
+            // ✅ Verifica sobreposição antes de adicionar
+            if (this._overlaps(x, y, w, h)) continue;
+
+            // ✅ 10% de chance de ser permanente (fixa, não some)
+            const isPermanent = Math.random() < 0.10;
+            this.platforms.push(new Platform(x, y, w, h, isPermanent));
         }
+    }
+
+    _overlaps(x, y, w, h) {
+        const mx = 20, my = 10; // margem horizontal e vertical
+        return this.platforms.some(p => {
+            if (p.permanent) return false;
+            return x < p.x + p.width  + mx &&
+                   x + w > p.x        - mx &&
+                   y < p.y + p.height + my &&
+                   y + h > p.y        - my;
+        });
     }
 }

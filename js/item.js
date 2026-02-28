@@ -21,10 +21,11 @@ export class Item {
 
     draw(ctx) {
         const icons = {
-            heal:   { icon: '❤️',  label: 'VIDA'    },
-            ammo:   { icon: '🔋',  label: 'MUNIÇÃO' },
-            armor:  { icon: '🛡️',  label: 'COLETE'  },
-            weapon: { icon: '🔫',  label: 'ARMA'    },
+            heal:        { icon: '❤️',  label: 'VIDA'    },
+            ammo_pistol: { icon: '🔋',  label: 'PISTOLA' },
+            ammo_rifle:  { icon: '📦',  label: 'FUZIL'   },
+            armor:       { icon: '🛡️',  label: 'COLETE'  },
+            weapon:      { icon: '🔫',  label: 'ARMA'    },
         };
 
         const item = icons[this.type] || { icon: '?', label: '' };
@@ -51,30 +52,24 @@ export class Item {
     }
 
     _bgColor() {
-        const colors = { heal: '#e53e3e', ammo: '#38a169', armor: '#4299e1', weapon: '#d69e2e' };
+        const colors = {
+            heal:        '#e53e3e',
+            ammo_pistol: '#38a169',
+            ammo_rifle:  '#2b6cb0',
+            armor:       '#4299e1',
+            weapon:      '#d69e2e'
+        };
         return colors[this.type] || '#888';
     }
 
     // Aplica o efeito no gameState quando coletado
     apply(gameState) {
         switch (this.type) {
-            case 'heal':   gameState.gainHP(30); break;
-            case 'ammo':
-                // Munição vai para pistola se tiver espaço, senão fuzil
-                if (gameState.weapons.pistol.ammo < gameState.weapons.pistol.maxAmmo) {
-                    gameState.gainAmmo('pistol', 10);
-                } else {
-                    gameState.gainAmmo('rifle', 15);
-                }
-                break;
-            case 'armor':  gameState.gainArmor(50); break;
-            case 'weapon':
-                // Dá munição de fuzil como upgrade
-                gameState.gainAmmo('rifle', 20);
-                if (gameState.weapons.rifle.ammo > 0 && gameState.currentWeapon === 'knife') {
-                    gameState.currentWeapon = 'rifle';
-                }
-                break;
+            case 'heal':        gameState.gainHP(30); break;
+            case 'ammo_pistol': gameState.gainAmmo('pistol', 10); break;
+            case 'ammo_rifle':  gameState.gainAmmo('rifle',  15); break;
+            case 'armor':       gameState.gainArmor(50); break;
+            case 'weapon':      gameState.gainAmmo('rifle',  20); break;
         }
         this.markedForDeletion = true;
     }

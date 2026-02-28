@@ -87,14 +87,21 @@ export class Player {
         // Aqui só garante invencibilidade após respawn
         if (this.invincible > 0) this.invincible -= deltaTime;
 
+        // ===== DIREÇÃO DE MIRA =====
+        // Horizontal: segue direction (esq/dir)
+        // Vertical: ArrowDown = baixo, ArrowUp no AR = cima, senão = horizontal
+        let aimY = 0; // 0=horizontal, -1=cima, 1=baixo
+        if (input.keys["ArrowDown"]) aimY = 1;
+        else if (input.keys["ArrowUp"] && !this.onGround) aimY = -1;
+
         // ===== TIRO / ATAQUE =====
         if (this.shootCooldown > 0) this.shootCooldown -= deltaTime;
         if (input.keys[" "] && this.shootCooldown <= 0) {
             if (gameState.currentWeapon === 'knife') {
-                this._knifeAttack();
-                this.shootCooldown = 500; // faca mais lenta
+                this._knifeAttack(aimY);
+                this.shootCooldown = 500;
             } else if (gameState.shoot()) {
-                this.shoot();
+                this.shoot(aimY);
                 this.shootCooldown = gameState.currentWeapon === 'rifle' ? 150 : 300;
             }
         }
@@ -142,21 +149,42 @@ export class Player {
         this.bullets.forEach(b => b.draw(ctx));
     }
 
-    shoot() {
-        // ✅ Tiro sempre horizontal na direção que o personagem está virado
-        const bulletX = this.direction === 1 ? this.x + this.width : this.x - 10;
-        const bulletY = this.y + this.height / 2 - 2; // centro do personagem
-        const speed   = gameState.currentWeapon === 'rifle' ? 16 : 10;
-        this.bullets.push(new Bullet(bulletX, bulletY, this.direction, speed));
+    shoot(aimY = 0) {
+        let bulletX, bulletY, dirX, dirY;
+        const speed = gameState.currentWeapon === 'rifle' ? 16 : 10;
+
+        if (aimY !== 0) {
+            // Tiro vertical: sai do centro do personagem
+            bulletX = this.x + this.width / 2 - 2;
+            bulletY = aimY === -1 ? this.y - 10 : this.y + this.height;
+            dirX    = 0;
+            dirY    = aimY;
+        } else {
+            // Tiro horizontal normal
+            bulletX = this.direction === 1 ? this.x + this.width : this.x - 10;
+            bulletY = this.y + this.height / 2 - 2;
+            dirX    = this.direction;
+            dirY    = 0;
+        }
+        this.bullets.push(new Bullet(bulletX, bulletY, dirX, speed, dirY));
     }
 
-    _knifeAttack() {
-        // Área de dano à frente do personagem
+    _knifeAttack(aimY = 0) {
         const range = 50;
-        const knifeX = this.direction === 1 ? this.x + this.width : this.x - range;
-        const knifeY = this.y;
-        const knifeW = range;
-        const knifeH = this.height;
+        let knifeX, knifeY, knifeW, knifeH;
+
+        if (aimY !== 0) {
+            // Facada vertical
+            knifeX = this.x;
+            knifeY = aimY === -1 ? this.y - range : this.y + this.height;
+            knifeW = this.width;
+            knifeH = range;
+        } else {
+            knifeX = this.direction === 1 ? this.x + this.width : this.x - range;
+            knifeY = this.y;
+            knifeW = range;
+            knifeH = this.height;
+        }
 
         for (let enemy of this.game.enemies) {
             if (!enemy.alive) continue;
@@ -167,10 +195,8 @@ export class Player {
             if (hit) {
                 enemy.takeDamage(1);
                 if (!enemy.alive) gameState.addKill(enemy.points);
+                }
             }
-        }
-
-        // Flash visual de facada
         this.knifeFlash = 200;
     }
 }

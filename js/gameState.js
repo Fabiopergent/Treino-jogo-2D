@@ -17,7 +17,7 @@ export const gameState = {
     weapons: {
         knife:  { name: 'Faca',   icon: '🔪', ammo: Infinity, maxAmmo: Infinity },
         pistol: { name: 'Pistola',icon: '🔫', ammo: 30,       maxAmmo: 30       },
-        rifle:  { name: 'Fuzil',  icon: '🪖', ammo: 40,        maxAmmo: 40       },
+        rifle:  { name: 'Fuzil',  icon: '🪖', ammo: 40,       maxAmmo: 40       }, // ✅ começa cheio
     },
 
     // Atalhos para o HUD (refletem a arma atual)
@@ -31,16 +31,16 @@ export const gameState = {
     kills: 0,
     playerName: 'Player',
 
-        // ===== FLAGS =====
-        isGameOver: false,
+    // ===== FLAGS =====
+    isGameOver: false,
 
-        // ===== VIDA =====
-        takeDamage(amount = 34) {
-            if (this.armor > 0) {
-                const absorbed = Math.min(this.armor, amount);
-                this.armor -= absorbed;
-                amount -= absorbed;
-            }
+    // ===== VIDA =====
+    takeDamage(amount = 34) {
+        if (this.armor > 0) {
+            const absorbed = Math.min(this.armor, amount);
+            this.armor -= absorbed;
+            amount -= absorbed;
+        }
         this.hp -= amount;
         if (this.hp <= 0) {
             this.hp = 0;
@@ -150,7 +150,7 @@ export const gameState = {
         this.weapons = {
             knife:  { name: 'Faca',   icon: '🔪', ammo: Infinity, maxAmmo: Infinity },
             pistol: { name: 'Pistola',icon: '🔫', ammo: 30,       maxAmmo: 30       },
-            rifle:  { name: 'Fuzil',  icon: '🪖', ammo: 0,        maxAmmo: 40       },
+            rifle:  { name: 'Fuzil',  icon: '🪖', ammo: 40,       maxAmmo: 40       }, // ✅ começa cheio
         };
         this.score       = 0;
         this.kills       = 0;

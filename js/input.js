@@ -60,8 +60,10 @@ export class Input {
 
             this.keys['ArrowLeft']  = dx < -threshold;
             this.keys['ArrowRight'] = dx >  threshold;
-            // Pulo por swipe para cima (opcional, mantém botão dedicado)
-            // this.keys['ArrowUp'] = dy < -threshold;
+            // ✅ Joystick para baixo = mira para baixo (atirar + baixo)
+            this.keys['ArrowDown']  = dy >  threshold;
+            // Joystick para cima NÃO pula (tem botão dedicado), mas ativa mira cima no ar
+            this.keys['AimUp']      = dy < -threshold;
         };
 
         const onEnd = () => {
@@ -70,6 +72,8 @@ export class Input {
             knob.style.transform = 'translate(-50%, -50%)';
             this.keys['ArrowLeft']  = false;
             this.keys['ArrowRight'] = false;
+            this.keys['ArrowDown']  = false;
+            this.keys['AimUp']      = false;
         };
 
         // Touch
@@ -152,6 +156,5 @@ export class Input {
         document.querySelectorAll('.weapon-btn').forEach(b => b.classList.remove('active'));
         const target = document.querySelector(`[data-weapon="${type}"]`);
         if (target) target.classList.add('active');
-        }
-
+    }
 }

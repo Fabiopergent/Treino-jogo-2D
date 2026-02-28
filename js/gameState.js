@@ -17,7 +17,7 @@ export const gameState = {
     weapons: {
         knife:  { name: 'Faca',   icon: '🔪', ammo: Infinity, maxAmmo: Infinity },
         pistol: { name: 'Pistola',icon: '🔫', ammo: 30,       maxAmmo: 30       },
-        rifle:  { name: 'Fuzil',  icon: '🪖', ammo: 0,        maxAmmo: 40       },
+        rifle:  { name: 'Fuzil',  icon: '🪖', ammo: 40,        maxAmmo: 40       },
     },
 
     // Atalhos para o HUD (refletem a arma atual)

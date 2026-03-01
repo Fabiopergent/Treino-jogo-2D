@@ -1,10 +1,11 @@
-import { Player }    from './player.js';
-import { Input }     from './input.js';
-import { Platform }  from './platform.js';
-import { Enemy }     from './enemy.js';
-import { Item }      from './item.js';
-import { HUD }       from './hud.js';
-import { gameState } from './gameState.js';
+import { Player }     from './player.js';
+import { Input }      from './input.js';
+import { Platform }   from './platform.js';
+import { Enemy }      from './enemy.js';
+import { Item }       from './item.js';
+import { HUD }        from './hud.js';
+import { gameState }  from './gameState.js';
+import { AssetLoader } from './assetLoader.js';
 
 export class Game {
     constructor() {
@@ -17,8 +18,9 @@ export class Game {
         this.cameraX      = 0;
         this.cameraSmooth = 0.1;
 
-        this.input = new Input();
-        this.hud   = new HUD(this.canvas);
+        this.input  = new Input();
+        this.hud    = new HUD(this.canvas);
+        this.assets = new AssetLoader(); // ✅ disponível para player e enemies
 
         this.running     = false;
         this.animFrameId = null;
@@ -311,10 +313,10 @@ export class Game {
         });
     }
 
-        generatePlatforms() {
-            this._genDir('right');
-            this._genDir('left');
-        }
+    generatePlatforms() {
+        this._genDir('right');
+        this._genDir('left');
+    }
 
     _genDir(dir) {
         const limit = dir === 'right'

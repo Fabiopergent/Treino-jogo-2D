@@ -3,47 +3,46 @@ import { gameState } from "./gameState.js";
 import { AnimatedSprite } from "./animatedSprite.js";
 
 export class Player {
-        constructor(x, y, game) {
-            this.game = game;
-            this.x = x;
-            this.y = y;
-            this.width  = 48;  // ajustado para o sprite
-            this.height = 64;  // ajustado para o sprite
-            this.speed = 5;
-            this.velocityY = 0;
-            this.gravity = 0.5;
-            this.jumpForce = -10;
-            this.jumpCutMultiplier = 0.4;
-            this.onGround = false;
-            this.bullets = [];
-            this.shootCooldown = 0;
-            this.direction = 1;
-            this.knifeFlash = 0;
-            this.invincible = 0;
-            
-            // ===== SPRITE =====
-            this.sprite = new AnimatedSprite(72, 128); // frameW x frameH da sua imagem
-            this._loadSprites();
-        }
+    constructor(x, y, game) {
+        this.game = game;
+        this.x = x;
+        this.y = y;
+        this.width  = 48;  // ajustado para o sprite
+        this.height = 64;  // ajustado para o sprite
+        this.speed = 5;
+        this.velocityY = 0;
+        this.gravity = 0.5;
+        this.jumpForce = -10;
+        this.jumpCutMultiplier = 0.4;
+        this.onGround = false;
+        this.bullets = [];
+        this.shootCooldown = 0;
+        this.direction = 1;
+        this.knifeFlash = 0;
+        this.invincible = 0;
+
+        // ===== SPRITE =====
+        this.sprite = new AnimatedSprite(72, 128); // frameW x frameH da sua imagem
+        this._loadSprites();
+    }
 
     _loadSprites() {
         const loader = this.game.assets;
 
-        // idle — já temos: faca_idle_1.png (grade 4x2 = 8 frames)
+        // idle — faca_idle_1.png (grade 4x2 = 8 frames, 72x128 cada)
+        // speed 180ms = ciclo de ~1.4s, natural para idle
         const idleImg = loader.loadRemoveBg('player_idle', 'assets/sprites/player/faca_idle_1.png');
-        this.sprite.addAnim('idle', idleImg, 4, 2, 120, true);
+        this.sprite.addAnim('idle', idleImg, 4, 2, 180, true);
 
-        // walk — quando pronto: faca_walk_1.png
-        // const walkImg = loader.loadRemoveBg('player_walk', 'assets/sprites/player/faca_walk_1.png');
-        // this.sprite.addAnim('walk', walkImg, 4, 2, 100, true);
+            // ── Descomente quando tiver os arquivos ──
+            // const walkImg = loader.loadRemoveBg('player_walk', 'assets/sprites/player/faca_walk_1.png');
+            // this.sprite.addAnim('walk', walkImg, 4, 2, 100, true);
 
-        // attack — quando pronto: faca_attack_1.png
-        // const attackImg = loader.loadRemoveBg('player_attack', 'assets/sprites/player/faca_attack_1.png');
-        // this.sprite.addAnim('attack', attackImg, 4, 2, 80, false);
+            // const attackImg = loader.loadRemoveBg('player_attack', 'assets/sprites/player/faca_attack_1.png');
+            // this.sprite.addAnim('attack', attackImg, 4, 2, 80, false);
 
-        // death — quando pronto: faca_death_1.png
-        // const deathImg = loader.loadRemoveBg('player_death', 'assets/sprites/player/faca_death_1.png');
-        // this.sprite.addAnim('death', deathImg, 4, 2, 120, false);
+            // const deathImg = loader.loadRemoveBg('player_death', 'assets/sprites/player/faca_death_1.png');
+            // this.sprite.addAnim('death', deathImg, 4, 2, 120, false);
 
         this.sprite.play('idle');
     }
@@ -161,30 +160,19 @@ export class Player {
         // Pisca se invencível
         if (this.invincible > 0 && Math.floor(this.invincible / 100) % 2 === 0) return;
 
-        // Tenta desenhar sprite — se não carregou ainda, usa fallback colorido
-        const drew = this.sprite.draw(ctx, this.x, this.y, this.width, this.height);
-        if (!drew) {
-            // Fallback: quadrado vermelho com olhos
-            ctx.fillStyle = '#e53e3e';
-            ctx.fillRect(this.x, this.y, this.width, this.height);
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(this.x + 6,  this.y + 8, 8, 8);
-            ctx.fillRect(this.x + 22, this.y + 8, 8, 8);
-            ctx.fillStyle = '#000';
-            ctx.fillRect(this.x + (this.direction > 0 ? 11 : 8), this.y + 11, 4, 4);
-            ctx.fillRect(this.x + (this.direction > 0 ? 27 : 24), this.y + 11, 4, 4);
-        }
+        // Sprite — se ainda carregando, não desenha nada (evita dupla imagem)
+        this.sprite.draw(ctx, this.x, this.y, this.width, this.height);
 
         // Flash de facada
-            if (this.knifeFlash > 0) {
-                this.knifeFlash -= 16;
-                const kx = this.direction === 1 ? this.x + this.width : this.x - 30;
-                ctx.save();
-                ctx.globalAlpha = this.knifeFlash / 200;
-                ctx.font = '28px Arial';
-                ctx.fillText('⚡', kx, this.y + 20);
-                ctx.restore();
-            }
+        if (this.knifeFlash > 0) {
+            this.knifeFlash -= 16;
+            const kx = this.direction === 1 ? this.x + this.width : this.x - 30;
+            ctx.save();
+            ctx.globalAlpha = this.knifeFlash / 200;
+            ctx.font = '28px Arial';
+            ctx.fillText('⚡', kx, this.y + 20);
+            ctx.restore();
+        }
 
         this.bullets.forEach(b => b.draw(ctx));
     }

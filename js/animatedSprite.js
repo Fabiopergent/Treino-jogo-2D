@@ -77,7 +77,15 @@ export class AnimatedSprite {
 
     draw(ctx, x, y, drawW, drawH) {
         const anim = this.anims[this.current];
-        if (!anim || !anim.image) return false; // sem imagem
+        if (!anim || !anim.image) return false;
+
+        // ✅ Verifica se o canvas/imagem já tem conteúdo carregado
+        const img = anim.image;
+        const isCanvas = img instanceof HTMLCanvasElement;
+        const isImage  = img instanceof HTMLImageElement;
+
+        if (isImage && !img.complete) return false;
+        if (isCanvas && img.width === 0) return false;
 
         // Posição do frame na grade
         const col  = this.frame % anim.cols;
@@ -87,25 +95,16 @@ export class AnimatedSprite {
 
         ctx.save();
 
-        if (this.flipped) {
-            // Espelha: translada para direita do sprite, escala -1 no X
-            ctx.translate(x + drawW, y);
-            ctx.scale(-1, 1);
-            ctx.drawImage(
-                anim.image,
-                srcX, srcY, this.frameW, this.frameH,
-                0, 0, drawW, drawH
-            );
-        } else {
-            ctx.drawImage(
-                anim.image,
-                srcX, srcY, this.frameW, this.frameH,
-                x, y, drawW, drawH
-            );
-        }
+            if (this.flipped) {
+                ctx.translate(x + drawW, y);
+                ctx.scale(-1, 1);
+                ctx.drawImage(img, srcX, srcY, this.frameW, this.frameH, 0, 0, drawW, drawH);
+            } else {
+                ctx.drawImage(img, srcX, srcY, this.frameW, this.frameH, x, y, drawW, drawH);
+            }
 
         ctx.restore();
-        return true; // desenhou com sucesso
+        return true;
     }
 
     /**

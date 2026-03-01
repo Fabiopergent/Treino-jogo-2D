@@ -18,11 +18,12 @@ export class AnimatedSprite {
         // Animações registradas: { nome: { image, cols, rows, speed, loop } }
         this.anims = {};
 
-        this.current     = null;  // nome da animação atual
-        this.frame       = 0;     // frame atual (índice linear)
-        this.timer       = 0;     // ms acumulados
-        this.done        = false; // animação não-loop terminou?
-        this.flipped     = false; // espelhar horizontalmente?
+        this.current     = null;
+        this.frame       = 0;
+        this.timer       = 0;
+        this.done        = false;
+        this.flipped     = false;
+        this.frozen      = false;
     }
 
     /**
@@ -35,14 +36,14 @@ export class AnimatedSprite {
      * @param loop     true = repete, false = para no último frame
      */
     addAnim(name, image, cols, rows, speed = 120, loop = true, totalFrames = null, rowOffset = 0) {
-            this.anims[name] = {
-                image,
-                cols,
-                rowOffset,                              // ✅ linha da sheet (0, 1, 2...)
-                totalFrames: totalFrames ?? (cols * (typeof rows === 'number' ? rows : 1)),
-                speed,
-                loop,
-            };
+        this.anims[name] = {
+            image,
+            cols,
+            rowOffset,                              // ✅ linha da sheet (0, 1, 2...)
+            totalFrames: totalFrames ?? (cols * (typeof rows === 'number' ? rows : 1)),
+            speed,
+            loop,
+        };
         if (!this.current) this.current = name;
     }
 
@@ -58,6 +59,7 @@ export class AnimatedSprite {
     update(deltaTime) {
         const anim = this.anims[this.current];
         if (!anim || this.done) return;
+        if (this.frozen) return; // ✅ não avança frames quando congelado (idle parado)
 
         this.timer += deltaTime;
         if (this.timer >= anim.speed) {
@@ -67,12 +69,15 @@ export class AnimatedSprite {
                 if (anim.loop) {
                     this.frame = 0;
                 } else {
-                    this.frame = anim.totalFrames - 1; // trava no último
+                    this.frame = anim.totalFrames - 1;
                     this.done  = true;
                 }
             }
         }
     }
+
+    freeze()   { this.frozen = true;  } // trava animação no frame atual
+    unfreeze() { this.frozen = false; } // retoma animação
 
     draw(ctx, x, y, drawW, drawH) {
         const anim = this.anims[this.current];
@@ -86,12 +91,12 @@ export class AnimatedSprite {
         if (isImage && !img.complete) return false;
         if (isCanvas && img.width === 0) return false;
 
-            // Posição do frame na sheet
-            const col  = this.frame % anim.cols;
-            const srcX = col * this.frameW;
-            const srcY = anim.rowOffset * this.frameH;  // ✅ linha correta da sheet
+        // Posição do frame na sheet
+        const col  = this.frame % anim.cols;
+        const srcX = col * this.frameW;
+        const srcY = anim.rowOffset * this.frameH;  // ✅ linha correta da sheet
 
-            ctx.save();
+        ctx.save();
 
         if (this.flipped) {
             ctx.translate(x + drawW, y);

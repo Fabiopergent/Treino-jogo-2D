@@ -45,21 +45,17 @@ export class Player {
         const fuzilImg = loader.load('rifle_sheet', 'assets/sprites/player/fuzil_sheet.png');
         this.sheets = {
             rifle: {
-                image:   fuzilImg,
-                fw: 158, fh: 169,
+                image: fuzilImg,
+                fw: 158, fh: 212,  // ✅ dimensão correta — 8 colunas x 4 linhas
                 cols: 8,
                 anims: {
                     idle:   { row: 0, frames: 8, speed: 160, loop: true  },
                     walk:   { row: 1, frames: 8, speed: 90,  loop: true  },
-                    attack: { row: 2, frames: 8, speed: 60,  loop: false },
-                    hit:    { row: 3, frames: 4, speed: 80,  loop: false },
-                    death:  { row: 4, frames: 8, speed: 120, loop: false },
-                }
-            },
-            // ── Descomente quando tiver os outros ──
-            // knife: { image: loader.load('knife_sheet','assets/sprites/player/faca_sheet.png'), fw:72, fh:64, cols:4, anims:{...} },
-            // pistol:{ image: loader.load('pistol_sheet','assets/sprites/player/pistola_sheet.png'), fw:158, fh:169, cols:8, anims:{...} },
-        };
+                    attack: { row: 2, frames: 4, speed: 60,  loop: false }, // só 4 frames com conteúdo
+                    death:  { row: 3, frames: 8, speed: 120, loop: false },
+                    }
+                },
+            };
 
         this.lastWeapon = null;
         this._applySheet('rifle'); // começa com fuzil
@@ -170,18 +166,26 @@ export class Player {
         }
 
         // ===== ATUALIZA ANIMAÇÃO =====
-            const moving = input.keys["ArrowLeft"] || input.keys["ArrowRight"];
-            if (this.knifeFlash > 0 && this.sprite.anims['attack']) {
-                this.sprite.play('attack');
-            } else if (moving && this.sprite.anims['walk']) {
-                this.sprite.play('walk');
-            } else {
-                this.sprite.play('idle');
-            }
+        const moving   = input.keys["ArrowLeft"] || input.keys["ArrowRight"];
+        const attacking = this.knifeFlash > 0 || this.shootCooldown > 200;
 
-            this.sprite.flipped = this.direction === -1;
-            this.sprite.update(deltaTime);
+        if (attacking && this.sprite.anims['attack']) {
+            this.sprite.unfreeze();
+            this.sprite.play('attack');
+        } else if (moving && this.sprite.anims['walk']) {
+            this.sprite.unfreeze();
+            this.sprite.play('walk');
+        } else {
+            // ✅ Parado: trava no frame 0 do idle
+            this.sprite.play('idle');
+            this.sprite.frame  = 0;
+            this.sprite.timer  = 0;
+            this.sprite.freeze();
         }
+
+        this.sprite.flipped = this.direction === -1;
+        this.sprite.update(deltaTime);
+    }
 
     reset() {
         // ✅ Só reseta física, NÃO muda posição — jogador fica onde está
@@ -191,26 +195,26 @@ export class Player {
         if (gameState.weapons.pistol.ammo < 10) gameState.weapons.pistol.ammo = 10;
     }
 
-        draw(ctx) {
-            if (this.invincible > 0 && Math.floor(this.invincible / 100) % 2 === 0) return;
+    draw(ctx) {
+        if (this.invincible > 0 && Math.floor(this.invincible / 100) % 2 === 0) return;
 
-            if (this.sprite) {
-                this.sprite.draw(ctx, this.x, this.y, this.width, this.height);
-            } else {
-                // Fallback enquanto carrega
-                ctx.fillStyle = '#e53e3e';
-                ctx.fillRect(this.x, this.y, this.width, this.height);
-            }
+        if (this.sprite) {
+            this.sprite.draw(ctx, this.x, this.y, this.width, this.height);
+        } else {
+            // Fallback enquanto carrega
+            ctx.fillStyle = '#e53e3e';
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
 
-            if (this.knifeFlash > 0) {
-                this.knifeFlash -= 16;
-                const kx = this.direction === 1 ? this.x + this.width : this.x - 30;
-                ctx.save();
-                ctx.globalAlpha = this.knifeFlash / 200;
-                ctx.font = '28px Arial';
-                ctx.fillText('⚡', kx, this.y + 20);
-                ctx.restore();
-            }
+        if (this.knifeFlash > 0) {
+            this.knifeFlash -= 16;
+            const kx = this.direction === 1 ? this.x + this.width : this.x - 30;
+            ctx.save();
+            ctx.globalAlpha = this.knifeFlash / 200;
+            ctx.font = '28px Arial';
+            ctx.fillText('⚡', kx, this.y + 20);
+            ctx.restore();
+        }
 
         this.bullets.forEach(b => b.draw(ctx));
     }

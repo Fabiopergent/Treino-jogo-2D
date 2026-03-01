@@ -20,30 +20,59 @@ export class Player {
         this.direction = 1;
         this.knifeFlash = 0;
         this.invincible = 0;
+        this.lastWeapon = null;
 
         // ===== SPRITE =====
-        // Imagem: 288x256px, grade 4x4 = 16 frames, cada frame 72x64px
-        this.sprite = new AnimatedSprite(72, 64);
+        // Inicializado em _loadSprites via _applySheet
+        this.sprite = null;
+        this.sheets = {};
         this._loadSprites();
     }
 
     _loadSprites() {
         const loader = this.game.assets;
 
-        // idle — faca_idle_1.png: 288x256px, grade 4x4 = 16 frames, cada 72x64px
-        const idleImg = loader.loadRemoveBg('player_idle', 'assets/sprites/player/faca_idle_1.png');
-        this.sprite.addAnim('idle', idleImg, 4, 4, 150, true);
+        // ============================================================
+        // SPRITE SHEETS — grade e mapeamento de animações
+        // Fuzil: 1264x848px, grade 8x5, frame 158x169px
+        //   Linha 0: idle   (8 frames)
+        //   Linha 1: walk   (8 frames)
+        //   Linha 2: attack (8 frames) — com muzzle flash
+        //   Linha 3: hit    (8 frames)
+        //   Linha 4: death  (8 frames)
+        // ============================================================
 
-        // ── Descomente quando tiver os arquivos ──
-        // const walkImg = loader.loadRemoveBg('player_walk', 'assets/sprites/player/faca_walk_1.png');
-        // this.sprite.addAnim('walk', walkImg, 4, 4, 100, true);
+        const fuzilImg = loader.load('rifle_sheet', 'assets/sprites/player/fuzil_sheet.png');
+        this.sheets = {
+            rifle: {
+                image:   fuzilImg,
+                fw: 158, fh: 169,
+                cols: 8,
+                anims: {
+                    idle:   { row: 0, frames: 8, speed: 160, loop: true  },
+                    walk:   { row: 1, frames: 8, speed: 90,  loop: true  },
+                    attack: { row: 2, frames: 8, speed: 60,  loop: false },
+                    hit:    { row: 3, frames: 4, speed: 80,  loop: false },
+                    death:  { row: 4, frames: 8, speed: 120, loop: false },
+                }
+            },
+            // ── Descomente quando tiver os outros ──
+            // knife: { image: loader.load('knife_sheet','assets/sprites/player/faca_sheet.png'), fw:72, fh:64, cols:4, anims:{...} },
+            // pistol:{ image: loader.load('pistol_sheet','assets/sprites/player/pistola_sheet.png'), fw:158, fh:169, cols:8, anims:{...} },
+        };
 
-        // const attackImg = loader.loadRemoveBg('player_attack', 'assets/sprites/player/faca_attack_1.png');
-        // this.sprite.addAnim('attack', attackImg, 4, 4, 80, false);
+        this.lastWeapon = null;
+        this._applySheet('rifle'); // começa com fuzil
+    }
 
-        // const deathImg = loader.loadRemoveBg('player_death', 'assets/sprites/player/faca_death_1.png');
-        // this.sprite.addAnim('death', deathImg, 4, 4, 120, false);
+    // Troca a sheet inteira quando muda de arma
+    _applySheet(weaponKey) {
+        const sheet = this.sheets[weaponKey] || this.sheets['rifle'];
+        this.sprite = new AnimatedSprite(sheet.fw, sheet.fh);
 
+        for (const [name, cfg] of Object.entries(sheet.anims)) {
+            this.sprite.addAnim(name, sheet.image, sheet.cols, 1, cfg.speed, cfg.loop, cfg.frames, cfg.row);
+        }
         this.sprite.play('idle');
     }
 
@@ -133,20 +162,26 @@ export class Player {
         this.bullets.forEach(b => b.update(deltaTime));
         this.bullets = this.bullets.filter(b => !b.markedForDeletion);
 
-        // ===== ATUALIZA ANIMAÇÃO =====
-        const moving = Math.abs(input.keys["ArrowLeft"] ? -1 : input.keys["ArrowRight"] ? 1 : 0) !== 0;
-        if (this.knifeFlash > 0 && this.sprite.anims['attack']) {
-            this.sprite.play('attack');
-        } else if (moving && this.sprite.anims['walk']) {
-            this.sprite.play('walk');
-        } else {
-            this.sprite.play('idle');
+        // ===== TROCA DE SHEET AO MUDAR ARMA =====
+        if (this.lastWeapon !== gameState.currentWeapon) {
+            this.lastWeapon = gameState.currentWeapon;
+            const key = this.sheets[gameState.currentWeapon] ? gameState.currentWeapon : 'rifle';
+            this._applySheet(key);
         }
 
-        // Espelha sprite conforme direção
-        this.sprite.flipped = this.direction === -1;
-        this.sprite.update(deltaTime);
-    }
+        // ===== ATUALIZA ANIMAÇÃO =====
+            const moving = input.keys["ArrowLeft"] || input.keys["ArrowRight"];
+            if (this.knifeFlash > 0 && this.sprite.anims['attack']) {
+                this.sprite.play('attack');
+            } else if (moving && this.sprite.anims['walk']) {
+                this.sprite.play('walk');
+            } else {
+                this.sprite.play('idle');
+            }
+
+            this.sprite.flipped = this.direction === -1;
+            this.sprite.update(deltaTime);
+        }
 
     reset() {
         // ✅ Só reseta física, NÃO muda posição — jogador fica onde está
@@ -156,23 +191,26 @@ export class Player {
         if (gameState.weapons.pistol.ammo < 10) gameState.weapons.pistol.ammo = 10;
     }
 
-    draw(ctx) {
-        // Pisca se invencível
-        if (this.invincible > 0 && Math.floor(this.invincible / 100) % 2 === 0) return;
+        draw(ctx) {
+            if (this.invincible > 0 && Math.floor(this.invincible / 100) % 2 === 0) return;
 
-        // Sprite — se ainda carregando, não desenha nada (evita dupla imagem)
-        this.sprite.draw(ctx, this.x, this.y, this.width, this.height);
+            if (this.sprite) {
+                this.sprite.draw(ctx, this.x, this.y, this.width, this.height);
+            } else {
+                // Fallback enquanto carrega
+                ctx.fillStyle = '#e53e3e';
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+            }
 
-        // Flash de facada
-        if (this.knifeFlash > 0) {
-            this.knifeFlash -= 16;
-            const kx = this.direction === 1 ? this.x + this.width : this.x - 30;
-            ctx.save();
-            ctx.globalAlpha = this.knifeFlash / 200;
-            ctx.font = '28px Arial';
-            ctx.fillText('⚡', kx, this.y + 20);
-            ctx.restore();
-        }
+            if (this.knifeFlash > 0) {
+                this.knifeFlash -= 16;
+                const kx = this.direction === 1 ? this.x + this.width : this.x - 30;
+                ctx.save();
+                ctx.globalAlpha = this.knifeFlash / 200;
+                ctx.font = '28px Arial';
+                ctx.fillText('⚡', kx, this.y + 20);
+                ctx.restore();
+            }
 
         this.bullets.forEach(b => b.draw(ctx));
     }

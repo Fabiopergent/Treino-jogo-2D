@@ -34,16 +34,15 @@ export class AnimatedSprite {
      * @param speed    ms por frame (ex: 120)
      * @param loop     true = repete, false = para no último frame
      */
-    addAnim(name, image, cols, rows, speed = 120, loop = true) {
-        this.anims[name] = {
-            image,
-            cols,
-            rows,
-            totalFrames: cols * rows,
-            speed,
-            loop,
-        };
-        // Define idle como padrão automaticamente
+    addAnim(name, image, cols, rows, speed = 120, loop = true, totalFrames = null, rowOffset = 0) {
+            this.anims[name] = {
+                image,
+                cols,
+                rowOffset,                              // ✅ linha da sheet (0, 1, 2...)
+                totalFrames: totalFrames ?? (cols * (typeof rows === 'number' ? rows : 1)),
+                speed,
+                loop,
+            };
         if (!this.current) this.current = name;
     }
 
@@ -87,21 +86,20 @@ export class AnimatedSprite {
         if (isImage && !img.complete) return false;
         if (isCanvas && img.width === 0) return false;
 
-        // Posição do frame na grade
-        const col  = this.frame % anim.cols;
-        const row  = Math.floor(this.frame / anim.cols);
-        const srcX = col * this.frameW;
-        const srcY = row * this.frameH;
+            // Posição do frame na sheet
+            const col  = this.frame % anim.cols;
+            const srcX = col * this.frameW;
+            const srcY = anim.rowOffset * this.frameH;  // ✅ linha correta da sheet
 
-        ctx.save();
+            ctx.save();
 
-            if (this.flipped) {
-                ctx.translate(x + drawW, y);
-                ctx.scale(-1, 1);
-                ctx.drawImage(img, srcX, srcY, this.frameW, this.frameH, 0, 0, drawW, drawH);
-            } else {
-                ctx.drawImage(img, srcX, srcY, this.frameW, this.frameH, x, y, drawW, drawH);
-            }
+        if (this.flipped) {
+            ctx.translate(x + drawW, y);
+            ctx.scale(-1, 1);
+            ctx.drawImage(img, srcX, srcY, this.frameW, this.frameH, 0, 0, drawW, drawH);
+        } else {
+            ctx.drawImage(img, srcX, srcY, this.frameW, this.frameH, x, y, drawW, drawH);
+        }
 
         ctx.restore();
         return true;

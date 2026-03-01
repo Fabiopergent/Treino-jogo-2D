@@ -7,8 +7,8 @@ export class Player {
         this.game = game;
         this.x = x;
         this.y = y;
-        this.width  = 48;  // ajustado para o sprite
-        this.height = 64;  // ajustado para o sprite
+        this.width  = 54;  // um pouco menor que o frame (72) para hitbox mais justa
+        this.height = 64;  // altura exata do frame
         this.speed = 5;
         this.velocityY = 0;
         this.gravity = 0.5;
@@ -22,27 +22,27 @@ export class Player {
         this.invincible = 0;
 
         // ===== SPRITE =====
-        this.sprite = new AnimatedSprite(72, 128); // frameW x frameH da sua imagem
+        // Imagem: 288x256px, grade 4x4 = 16 frames, cada frame 72x64px
+        this.sprite = new AnimatedSprite(72, 64);
         this._loadSprites();
     }
 
     _loadSprites() {
         const loader = this.game.assets;
 
-        // idle — faca_idle_1.png (grade 4x2 = 8 frames, 72x128 cada)
-        // speed 180ms = ciclo de ~1.4s, natural para idle
+        // idle — faca_idle_1.png: 288x256px, grade 4x4 = 16 frames, cada 72x64px
         const idleImg = loader.loadRemoveBg('player_idle', 'assets/sprites/player/faca_idle_1.png');
-        this.sprite.addAnim('idle', idleImg, 4, 2, 180, true);
+        this.sprite.addAnim('idle', idleImg, 4, 4, 150, true);
 
-            // ── Descomente quando tiver os arquivos ──
-            // const walkImg = loader.loadRemoveBg('player_walk', 'assets/sprites/player/faca_walk_1.png');
-            // this.sprite.addAnim('walk', walkImg, 4, 2, 100, true);
+        // ── Descomente quando tiver os arquivos ──
+        // const walkImg = loader.loadRemoveBg('player_walk', 'assets/sprites/player/faca_walk_1.png');
+        // this.sprite.addAnim('walk', walkImg, 4, 4, 100, true);
 
-            // const attackImg = loader.loadRemoveBg('player_attack', 'assets/sprites/player/faca_attack_1.png');
-            // this.sprite.addAnim('attack', attackImg, 4, 2, 80, false);
+        // const attackImg = loader.loadRemoveBg('player_attack', 'assets/sprites/player/faca_attack_1.png');
+        // this.sprite.addAnim('attack', attackImg, 4, 4, 80, false);
 
-            // const deathImg = loader.loadRemoveBg('player_death', 'assets/sprites/player/faca_death_1.png');
-            // this.sprite.addAnim('death', deathImg, 4, 2, 120, false);
+        // const deathImg = loader.loadRemoveBg('player_death', 'assets/sprites/player/faca_death_1.png');
+        // this.sprite.addAnim('death', deathImg, 4, 4, 120, false);
 
         this.sprite.play('idle');
     }

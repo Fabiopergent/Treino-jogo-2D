@@ -46,16 +46,17 @@ export class Player {
         this.sheets = {
             rifle: {
                 image: fuzilImg,
-                fw: 158, fh: 212,  // ✅ dimensão correta — 8 colunas x 4 linhas
+                fw: 158, fh: 169,  // dimensão real por linha
                 cols: 8,
                 anims: {
                     idle:   { row: 0, frames: 8, speed: 160, loop: true  },
                     walk:   { row: 1, frames: 8, speed: 90,  loop: true  },
-                    attack: { row: 2, frames: 4, speed: 60,  loop: false }, // só 4 frames com conteúdo
-                    death:  { row: 3, frames: 8, speed: 120, loop: false },
-                    }
-                },
-            };
+                    attack: { row: 2, frames: 4, speed: 60,  loop: false },
+                    // row 3 = "hit" (não usada, mas existe na sheet — não pule o índice)
+                    death:  { row: 4, frames: 8, speed: 120, loop: false },
+                }
+            },
+        };
 
         this.lastWeapon = null;
         this._applySheet('rifle'); // começa com fuzil
@@ -67,7 +68,7 @@ export class Player {
     this.sprite = new AnimatedSprite(sheet.fw, sheet.fh);
 
     // Descobre quantas linhas a sheet possui no total (ex: 4 linhas)
-    const totalRows = Object.keys(sheet.anims).length; 
+    const totalRows = sheet.rows || 5;
 
     for (const [name, cfg] of Object.entries(sheet.anims)) {
         // ✅ Corrigido: substituído '1' por 'totalRows'

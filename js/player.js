@@ -63,14 +63,18 @@ export class Player {
 
     // Troca a sheet inteira quando muda de arma
     _applySheet(weaponKey) {
-        const sheet = this.sheets[weaponKey] || this.sheets['rifle'];
-        this.sprite = new AnimatedSprite(sheet.fw, sheet.fh);
+    const sheet = this.sheets[weaponKey] || this.sheets['rifle'];
+    this.sprite = new AnimatedSprite(sheet.fw, sheet.fh);
 
-        for (const [name, cfg] of Object.entries(sheet.anims)) {
-            this.sprite.addAnim(name, sheet.image, sheet.cols, 1, cfg.speed, cfg.loop, cfg.frames, cfg.row);
-        }
-        this.sprite.play('idle');
+    // Descobre quantas linhas a sheet possui no total (ex: 4 linhas)
+    const totalRows = Object.keys(sheet.anims).length; 
+
+    for (const [name, cfg] of Object.entries(sheet.anims)) {
+        // ✅ Corrigido: substituído '1' por 'totalRows'
+        this.sprite.addAnim(name, sheet.image, sheet.cols, totalRows, cfg.speed, cfg.loop, cfg.frames, cfg.row);
     }
+    this.sprite.play('idle');
+}
 
     update(input, deltaTime) {
         const speedFactor = deltaTime / 16.6;

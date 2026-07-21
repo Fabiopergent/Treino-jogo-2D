@@ -46,7 +46,7 @@ export class Player {
         this.sheets = {
             rifle: {
                 image: fuzilImg,
-                fw: 131, fh: 111,  // dimensão real por linha
+                fw: 158, fh: 169,  // dimensão real por linha
                 cols: 8,
                 anims: {
                     idle:   { row: 0, frames: 8, speed: 160, loop: true  },
